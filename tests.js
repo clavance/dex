@@ -27,9 +27,9 @@ ipfs.on('ready', async () => {
   db = await orbitdb.keyvalue('test-database-1')
 
   await db.put("metadata", {
-  	best_bid: 1,
-  	best_ask: 1,
-  	tick_size: 0.01,
+    best_bid: 1,
+    best_ask: 1,
+    tick_size: 0.01,
   })
 
   // Test that retrieved metadata is as expected
@@ -52,11 +52,11 @@ ipfs.on('ready', async () => {
   // Test that length of queue at key 20 is 1, after putting a single order into it
   num_tests_run++;
   try {
-  	assert.strictEqual(db.get(20).length, 1);
-  	num_tests_passed++;
+    assert.strictEqual(db.get(20).length, 1);
+    num_tests_passed++;
   } catch (err) {
-  	num_tests_failed++;
-  	console.log(err.name, ": ", err.actual, err.operator, err.expected);
+    num_tests_failed++;
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
   // Test that object we can fetch the object we just put in, as expected
@@ -95,10 +95,10 @@ ipfs.on('ready', async () => {
 
   // Compute stats of tests that passed/failed
   if (num_tests_passed === num_tests_run) {
-  	console.log("ALL " + num_tests_run + " TESTS PASSED!")
+    console.log("ALL " + num_tests_run + " TESTS PASSED!")
   } else {
-  	console.log("NOT ALL TESTS PASSED!")
-  	console.log(num_tests_passed + " out of " + num_tests_run + " tests passed.")
+    console.log("NOT ALL TESTS PASSED!")
+    console.log(num_tests_passed + " out of " + num_tests_run + " tests passed.")
 
   }
 
