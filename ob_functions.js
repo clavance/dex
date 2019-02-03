@@ -11,7 +11,7 @@ async function addOrder(db, is_buy_in, amount_in, price_in, user_in) {
 		is_buy: is_buy_in,
 		amount: amount_in,
 		price: price_in,
-		timestamp: new Date().toLocaleString(),
+		timestamp: new Date().getTime(),
 		user: user_in
 	}
 
