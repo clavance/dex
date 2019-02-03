@@ -130,7 +130,7 @@ ipfs.on('ready', async () => {
   // Test cancelling orders within same queue, queue length changes
   num_tests_run++;
   try {
-    cancelOrder(db, 20, "A", ts_a);
+    await cancelOrder(db, 20, "A", ts_a);
     assert.strictEqual(db.get(20).length, 1);
     num_tests_passed++;
   } catch (err) {
@@ -140,16 +140,35 @@ ipfs.on('ready', async () => {
 
   let ts_c = await addOrder(db, true, 100.0, 20, "C");
 
-  // Test cancelling orders within same queue, correct order gets cancelled
+  // // Test cancelling orders within same queue, correct order gets cancelled
   num_tests_run++;
   try {
-    cancelOrder(db, 20, "B", ts_b);
+    await cancelOrder(db, 20, "B", ts_b);
     assert.strictEqual(db.get(20)[0].user, "C");
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
+
+  // Test cancel last order in queue, queue becomes empty
+  num_tests_run++;
+  try {
+    await cancelOrder(db, 20, "C", ts_c);
+    assert.strictEqual(db.get(20).length, 0);
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+
+  // Test best bid changes when deleting best bid order
+
+  // Test best ask changes when deleting best ask order
+
+  // Test cancelling non-existent order
+
 
   // Compute stats of tests that passed/failed
   if (num_tests_passed === num_tests_run) {
@@ -158,14 +177,6 @@ ipfs.on('ready', async () => {
     console.log("NOT ALL cancelOrder TESTS PASSED!");
     console.log(num_tests_passed + " out of " + num_tests_run + " tests passed.");
   }
-
-  // Test cancel last order in queue, queue gets deleted
-
-  // Test best bid changes when deleting best bid order
-
-  // Test best ask changes when deleting best ask order
-
-  // Test cancelling non-existent order
 
   db.close();
 

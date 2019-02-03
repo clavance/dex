@@ -58,11 +58,13 @@ async function cancelOrder(db, price, user, timestamp) {
 
   // Find index of order to remove
   let i;
-  for (i = 0; i < queue.length; i++)
-    if (queue[i].timestamp === timestamp && queue[i].user === user)
+  for (i = 0; i < queue.length; i++) {
+    if (queue[i].timestamp === timestamp && queue[i].user === user) {
       break;
+    }
+  }
   // Remove order
-  queue = queue.splice(i, 1);
+  queue.splice(i, 1);
 
   // Put updated queue into database
   await db.set(price, queue);
