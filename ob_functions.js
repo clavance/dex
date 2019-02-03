@@ -8,11 +8,13 @@
  */
 async function addOrder(db, is_buy_in, amount_in, price_in, user_in) {
 
+  let order_ts = new Date().getTime();
+
   const order = {
     is_buy: is_buy_in,
     amount: amount_in,
     price: price_in,
-    timestamp: new Date().getTime(),
+    timestamp: order_ts,
     user: user_in
   }
 
@@ -37,6 +39,8 @@ async function addOrder(db, is_buy_in, amount_in, price_in, user_in) {
       await db.set("metadata", metadata);
     }
   }
+
+  return order_ts;
 }
 
 module.exports = addOrder;
