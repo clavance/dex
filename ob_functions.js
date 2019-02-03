@@ -1,5 +1,6 @@
 /**
  * Add order to order book database, without performing any matching.
+ * @param {keyValueStore} db - OrbitDB key value database holding order book.
  * @param {bool} is_buy_in - True if order is a buy order, false otherwise.
  * @param {float} amount_in - Amount of currency to trade.
  * @param {float} price_in - Price at which to trade.
