@@ -1,3 +1,5 @@
+"use strict"
+
 /**
  * Add order to order book database, without performing any matching.
  * @param {keyValueStore} db - OrbitDB key value database holding order book.
@@ -56,12 +58,9 @@ async function cancelOrder(db, price, user, timestamp) {
 
   // Find index of order to remove
   let i;
-  for (i = 0; i < queue.length; i++) {
-    if (queue[i].timestamp === timestamp && queue[i].user === user) {
-      remove_index = i;
+  for (i = 0; i < queue.length; i++)
+    if (queue[i].timestamp === timestamp && queue[i].user === user)
       break;
-    }
-  }
   // Remove order
   queue = queue.splice(i, 1);
 
