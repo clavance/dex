@@ -43,4 +43,33 @@ async function addOrder(db, is_buy_in, amount_in, price_in, user_in) {
   return order_ts;
 }
 
-module.exports = addOrder;
+/**
+ * Cancel order in order book database
+ * @param {keyValueStore} db - OrbitDB key value database holding order book.
+ * @param {float} price - Price at which order was placed.
+ * @param {string} user - Identifies user.
+ * @param {int} timestamp - Timestamp (unix time) at which order was placed.
+ */
+async function cancelOrder(db, price, user, timestamp) {
+
+  let queue = db.get(price);
+
+  // Find index of order to remove
+  let i;
+  for (i = 0; i < queue.length; i++) {
+    if (queue[i].timestamp === timestamp && queue[i].user === user) {
+      remove_index = i;
+      break;
+    }
+  }
+  // Remove order
+  queue = queue.splice(i, 1);
+
+  // Put updated queue into database
+  await db.set(price, queue);
+}
+
+module.exports = {
+  addOrder: addOrder,
+  cancelOrder: cancelOrder
+}

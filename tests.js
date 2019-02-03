@@ -1,12 +1,11 @@
-const addOrder = require('./ob_functions');
+let ob_functions = require('./ob_functions');
+let addOrder = ob_functions.addOrder;
+let cancelOrder = ob_functions.cancelOrder;
+
 const assert = require('assert');
 const IPFS = require('ipfs');
 const OrbitDB = require('orbit-db');
 
-
-let num_tests_failed = 0;
-let num_tests_run = 0;
-let num_tests_passed = 0;
 
 const ipfsOptions = {
   EXPERIMENTAL: {
@@ -14,23 +13,27 @@ const ipfsOptions = {
   }
 }
 
-let db;
-
 // Create IPFS instance
 const ipfs = new IPFS(ipfsOptions);
 
-// addOrder tests
 ipfs.on('ready', async () => {
-  // Create OrbitDB instance
-  const orbitdb = new OrbitDB(ipfs)
 
-  db = await orbitdb.keyvalue('test-database-1')
+  // TEST: addOrder
+
+  let num_tests_failed = 0;
+  let num_tests_run = 0;
+  let num_tests_passed = 0;
+
+  // Create OrbitDB instance
+  let orbitdb = new OrbitDB(ipfs);
+
+  let db = await orbitdb.keyvalue('test-database-1');
 
   await db.put("metadata", {
     best_bid: 1,
     best_ask: 1,
     tick_size: 0.01,
-  })
+  });
 
   // Test that retrieved metadata is as expected
   num_tests_run++;
@@ -95,29 +98,31 @@ ipfs.on('ready', async () => {
 
   // Compute stats of tests that passed/failed
   if (num_tests_passed === num_tests_run) {
-    console.log("ALL " + num_tests_run + " addOrder TESTS PASSED!")
+    console.log("ALL " + num_tests_run + " addOrder TESTS PASSED!");
   } else {
-    console.log("NOT ALL addOrder TESTS PASSED!")
-    console.log(num_tests_passed + " out of " + num_tests_run + " tests passed.")
+    console.log("NOT ALL addOrder TESTS PASSED!");
+    console.log(num_tests_passed + " out of " + num_tests_run + " tests passed.");
   }
 
   db.close();
 
-})
 
-// cancelOrder tests
-ipfs.on('ready', async () => {
+  // TEST: cancelOrder
+
+  num_tests_failed = 0;
+  num_tests_run = 0;
+  num_tests_passed = 0;
 
   // Create OrbitDB instance
-  const orbitdb = new OrbitDB(ipfs)
+  orbitdb = new OrbitDB(ipfs);
 
-  db = await orbitdb.keyvalue('test-database-2')
+  db = await orbitdb.keyvalue('test-database-2');
 
   await db.put("metadata", {
     best_bid: 1,
     best_ask: 1,
     tick_size: 0.01,
-  })
+  });
 
   let ts_a = await addOrder(db, true, 100.0, 20, "A");
   let ts_b = await addOrder(db, true, 50.0, 20, "B");
@@ -146,22 +151,21 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
+  // Compute stats of tests that passed/failed
+  if (num_tests_passed === num_tests_run) {
+    console.log("ALL " + num_tests_run + " cancelOrder TESTS PASSED!");
+  } else {
+    console.log("NOT ALL cancelOrder TESTS PASSED!");
+    console.log(num_tests_passed + " out of " + num_tests_run + " tests passed.");
+  }
+
   // Test cancel last order in queue, queue gets deleted
 
   // Test best bid changes when deleting best bid order
 
   // Test best ask changes when deleting best ask order
 
-
-
-
-  // Compute stats of tests that passed/failed
-  if (num_tests_passed === num_tests_run) {
-    console.log("ALL " + num_tests_run + " cancelOrder TESTS PASSED!")
-  } else {
-    console.log("NOT ALL cancelOrder TESTS PASSED!")
-    console.log(num_tests_passed + " out of " + num_tests_run + " tests passed.")
-  }
+  // Test cancelling non-existent order
 
   db.close();
 
