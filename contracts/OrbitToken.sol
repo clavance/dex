@@ -15,13 +15,13 @@ pragma solidity ^0.5.0;
 contract OrbitToken {
 
 	// token name
-	string public name = "Orbit Token";
+	string private _name = "Orbit Token";
 
 	// token symbol
-	string public symbol = "ORB";
+	string private _symbol = "ORB";
 
 	//token version
-	string public version = "ORB v1.0";
+	string private _version = "ORB v1.0";
 
 	//total supply
 	uint256 private _totalSupply;
@@ -46,6 +46,21 @@ contract OrbitToken {
 		//for now, balance should be first address in ganache
 		balanceOf[msg.sender] = _initialSupply;
 		_totalSupply = _initialSupply;
+	}
+
+	//returns the name of the token
+	function name() public view returns (string memory) {
+		return _name;
+	}
+
+	//returns the symbol of the token
+	function symbol() public view returns (string memory) {
+		return _symbol;
+	}
+
+	//returns the symbol of the token
+	function version() public view returns (string memory) {
+		return _version;
 	}
 
 	//_totalSupply is initialised in constructor
