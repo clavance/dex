@@ -181,7 +181,7 @@ ipfs.on('ready', async () => {
   // Test cancelling orders within same queue, queue length changes
   num_tests_run++;
   try {
-    await cancelOrder(db, 20, "A", ts_a);
+    await cancelOrder(db, 20, "A", ts_a, true);
     assert.strictEqual(db.get(20).length, 1);
     num_tests_passed++;
   } catch (err) {
@@ -194,7 +194,7 @@ ipfs.on('ready', async () => {
   // // Test cancelling orders within same queue, correct order gets cancelled
   num_tests_run++;
   try {
-    await cancelOrder(db, 20, "B", ts_b);
+    await cancelOrder(db, 20, "B", ts_b, true);
     assert.strictEqual(db.get(20)[0].user, "C");
     num_tests_passed++;
   } catch (err) {
@@ -205,7 +205,7 @@ ipfs.on('ready', async () => {
   // Test cancel last order in queue, queue becomes empty
   num_tests_run++;
   try {
-    await cancelOrder(db, 20, "C", ts_c);
+    await cancelOrder(db, 20, "C", ts_c, true);
     assert.strictEqual(db.get(20).length, 0);
     num_tests_passed++;
   } catch (err) {
@@ -219,7 +219,7 @@ ipfs.on('ready', async () => {
   // Test best bid changes when deleting best bid order
   num_tests_run++;
   try {
-    await cancelOrder(db, 30, "E", ts_e);
+    await cancelOrder(db, 30, "E", ts_e, true);
     assert.strictEqual(db.get("metadata").best_bid, 20);
     num_tests_passed++;
   } catch (err) {
