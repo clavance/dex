@@ -35,10 +35,20 @@ async function addOrder(db, is_buy_in, amount_in, price_in, user_in) {
       metadata.best_bid = order.price;
       await db.set("metadata", metadata);
     }
+    if ((metadata.worst_bid === undefined)||(order.price < metadata.worst_bid)) {
+      metadata.worst_bid = order.price;
+      await db.set("metadata", metadata);
+    }
+
   } else {
     if ((metadata.best_ask === undefined) || (order.price < metadata.best_ask)) {
       metadata.best_ask = order.price;
       await db.set("metadata", metadata);
+    }
+    if ((metadata.worst_ask === undefined)||(order.price > metadata.worst_ask)) {
+      metadata.worst_ask = order.price;
+      await
+      db.set("metadata", metadata);
     }
   }
 
@@ -68,6 +78,8 @@ async function cancelOrder(db, price, user, timestamp) {
 
   // Put updated queue into database
   await db.set(price, queue);
+
+
 }
 
 module.exports = {

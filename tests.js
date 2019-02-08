@@ -30,9 +30,11 @@ ipfs.on('ready', async () => {
   let db = await orbitdb.keyvalue('test-database-1');
 
   await db.put("metadata", {
-    best_bid: 1,
-    best_ask: 1,
+    best_bid: undefined,
+    best_ask: undefined,
     tick_size: 0.01,
+    worst_bid: undefined,
+    worst_ask: undefined,
   });
 
   // Test that retrieved metadata is as expected
@@ -40,9 +42,11 @@ ipfs.on('ready', async () => {
   try {
     let result = db.get("metadata");
     assert.strictEqual(JSON.stringify(result), JSON.stringify({
-      best_bid: 1,
-      best_ask: 1,
-      tick_size: 0.01
+      best_bid: undefined,
+      best_ask: undefined,
+      tick_size: 0.01,
+      worst_bid: undefined,
+      worst_ask: undefined,
     }));
     num_tests_passed++;
   } catch (err) {
