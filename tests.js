@@ -99,6 +99,53 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
+  await addOrder(db, true, 50.0, 30, "C");
+
+  // Test that best_bid in metadata gets updated when adding new best bid order
+  num_tests_run++;
+  try {
+    assert.strictEqual(db.get("metadata").best_bid, 30);
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  await addOrder(db, false, 50.0, 60, "D");
+
+  // Test that best_ask in metadata gets updated when adding new best ask order
+  num_tests_run++;
+  try {
+    assert.strictEqual(db.get("metadata").best_ask, 60);
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  await addOrder(db, false, 50.0, 100, "E");
+
+  // Test that worst_ask in metadata gets updated when adding new worst ask order
+  num_tests_run++;
+  try {
+    assert.strictEqual(db.get("metadata").worst_ask, 100);
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  await addOrder(db, true, 50.0, 10, "E");
+
+  // Test that worst_bid in metadata gets updated when adding new worst bid order
+  num_tests_run++;
+  try {
+    assert.strictEqual(db.get("metadata").worst_bid, 10);
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
 
   // Compute stats of tests that passed/failed
   if (num_tests_passed === num_tests_run) {
