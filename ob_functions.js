@@ -4,8 +4,8 @@
  * Add order to order book database, without performing any matching.
  * @param {keyValueStore} db - OrbitDB key value database holding order book.
  * @param {bool} is_buy_in - True if order is a buy order, false otherwise.
- * @param {float} amount_in - Amount of currency to trade.
- * @param {float} price_in - Price at which to trade.
+ * @param {int} amount_in - Amount of currency to trade.
+ * @param {int} price_in - Price at which to trade.
  * @param {string} user_in - Identifies user.
  */
 async function addOrder(db, is_buy_in, amount_in, price_in, user_in) {
@@ -58,7 +58,7 @@ async function addOrder(db, is_buy_in, amount_in, price_in, user_in) {
 /**
  * Cancel order in order book database
  * @param {keyValueStore} db - OrbitDB key value database holding order book.
- * @param {float} price - Price at which order was placed.
+ * @param {int} price - Price at which order was placed.
  * @param {string} user - Identifies user.
  * @param {int} timestamp - Timestamp (unix time) at which order was placed.
  * @param {boolean} is_buy -  true if buy order, false if sell order.
@@ -73,7 +73,7 @@ async function cancelOrder(db, price, user, timestamp, is_buy) {
 /**
  * Remove order in order book database
  * @param {keyValueStore} db - OrbitDB key value database holding order book.
- * @param {float} price - Price at which order was placed.
+ * @param {int} price - Price at which order was placed.
  * @param {string} user - Identifies user.
  * @param {int} timestamp - Timestamp (unix time) at which order was placed.
  * @param {boolean} is_buy -  true if buy order, false if sell order.
@@ -101,7 +101,7 @@ async function removeOrder(db, price, user, timestamp, is_buy) {
 /**
  * Update metadata fields after removing order from order book database
  * @param {keyValueStore} db - OrbitDB key value database holding order book.
- * @param {float} price - Price at which order was placed.
+ * @param {int} price - Price at which order was placed.
  * @param {string} user - Identifies user.
  * @param {int} timestamp - Timestamp (unix time) at which order was placed.
  * @param {boolean} is_buy -  true if buy order, false if sell order.
