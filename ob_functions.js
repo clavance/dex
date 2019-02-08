@@ -65,6 +65,21 @@ async function addOrder(db, is_buy_in, amount_in, price_in, user_in) {
  */
 async function cancelOrder(db, price, user, timestamp, is_buy) {
 
+  await removeOrder(db, price, user, timestamp, is_buy);
+
+  await updateMetadataAfterOrderRemoval(db, price, is_buy);
+}
+
+/**
+ * Remove order in order book database
+ * @param {keyValueStore} db - OrbitDB key value database holding order book.
+ * @param {float} price - Price at which order was placed.
+ * @param {string} user - Identifies user.
+ * @param {int} timestamp - Timestamp (unix time) at which order was placed.
+ * @param {boolean} is_buy -  true if buy order, false if sell order.
+ */
+async function removeOrder(db, price, user, timestamp, is_buy) {
+
   let queue = db.get(price);
 
   // Find index of order to remove
@@ -81,6 +96,17 @@ async function cancelOrder(db, price, user, timestamp, is_buy) {
 
   // Put updated queue into database
   await db.set(price, queue);
+}
+
+/**
+ * Update metadata fields after removing order from order book database
+ * @param {keyValueStore} db - OrbitDB key value database holding order book.
+ * @param {float} price - Price at which order was placed.
+ * @param {string} user - Identifies user.
+ * @param {int} timestamp - Timestamp (unix time) at which order was placed.
+ * @param {boolean} is_buy -  true if buy order, false if sell order.
+ */
+async function updateMetadataAfterOrderRemoval(db, price, is_buy) {
 
   let metadata = db.get("metadata");
 
@@ -92,7 +118,7 @@ async function cancelOrder(db, price, user, timestamp, is_buy) {
     return;
 
   // Return from function if at least one order at price level
-  if (queue.length > 0)
+  if (db.get(price).length > 0)
     return;
 
   // Get start and end prices of range to search through
@@ -127,7 +153,7 @@ async function cancelOrder(db, price, user, timestamp, is_buy) {
     metadata.worst_ask = max_val;
   }
 
-  db.set("metadata", metadata);
+  await db.set("metadata", metadata);
 }
 
 module.exports = {
