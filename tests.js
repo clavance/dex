@@ -162,8 +162,19 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
+  let ts_d = await addOrder(db, true, 100.0, 20, "D");
+  let ts_e = await addOrder(db, true, 100.0, 30, "E");
 
   // Test best bid changes when deleting best bid order
+  num_tests_run++;
+  try {
+    await cancelOrder(db, 30, "E", ts_e);
+    assert.strictEqual(db.get("metadata").best_bid, 20);
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
 
   // Test best ask changes when deleting best ask order
 
