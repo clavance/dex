@@ -82,15 +82,24 @@ async function removeOrder(db, price, user, timestamp, is_buy) {
 
   let queue = db.get(price);
 
+  if (queue === undefined || queue.length === 0)
+    throw new Error("InvalidOrder");
+
   // Find index of order to remove
   let i;
+  let found = false;
   for (i = 0; i < queue.length; i++) {
     if (queue[i].timestamp === timestamp &&
         queue[i].user === user &&
         queue[i].is_buy === is_buy) {
+      found = true;
       break;
     }
   }
+  // Didn't find target order in queue
+  if (!found)
+    throw new Error("InvalidOrder");
+
   // Remove order
   queue.splice(i, 1);
 
