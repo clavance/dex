@@ -1,3 +1,0 @@
-# Order Book
-
-This repository houses the order book component of the Decentralised ERC-20 Exchange on OrbitDB project. This component is responsible for managing the order book (hosted on OrbitDB), including adding, removing and matching orders. It also will provide functionality to serve the entire contents of the order book, which could, for example, be used by a front-end componenet to show the current state of the order book. It will also house the trade history.
