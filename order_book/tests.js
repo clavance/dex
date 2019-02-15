@@ -269,24 +269,17 @@ ipfs.on('ready', async () => {
   }
 
   // Test cancelling non-existent order
-  num_tests_run++;
+    num_tests_run++;
   try {
-    // Test should throw error
-    assert.throws(await cancelOrder(db, 89, "J", ts_i, false), Error);
-    // Check that message of error is as expected
-    let message;
-    try {
-      await cancelOrder(db, 89, "J", ts_i, false);
-    } catch (err) {
-      message = err.message
-    }
-    assert.strictEqual(message, "InvalidOrder");
+  	await cancelOrder(db, 89, "J", ts_i, false).catch(
+  		error => {assert.strictEqual(error.message, "InvalidOrder")});
+    // await cancelOrder(db, 120, "I", ts_i, false);
+    // assert.strictEqual(db.get("metadata").worst_ask, 100);
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
-
 
   // Compute stats of tests that passed/failed
   if (num_tests_passed === num_tests_run) {
