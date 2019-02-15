@@ -13,7 +13,7 @@ class Order {
 /**
  * Add order to order book database, without performing any matching.
  * @param {keyValueStore} db - OrbitDB key value database holding order book.
- * @param {order} Order - Contains details of order to add.
+ * @param {Order} order - Contains details of order to add.
  */
 async function addOrder(db, order) {
 
@@ -58,7 +58,7 @@ async function addOrder(db, order) {
 /**
  * Cancel order in order book database
  * @param {keyValueStore} db - OrbitDB key value database holding order book.
- * @param {order} Order - Contains details of order to cancel.
+ * @param {Order} order - Contains details of order to cancel.
  */
 async function cancelOrder(db, order) {
 
@@ -70,7 +70,7 @@ async function cancelOrder(db, order) {
 /**
  * Remove order in order book database
  * @param {keyValueStore} db - OrbitDB key value database holding order book.
- * @param {order} Order - Contains details of order to remove.
+ * @param {Order} order - Contains details of order to remove.
  */
 async function removeOrder(db, order) {
 
@@ -104,7 +104,7 @@ async function removeOrder(db, order) {
 /**
  * Update metadata fields after removing order from order book database
  * @param {keyValueStore} db - OrbitDB key value database holding order book.
- * @param {order} Order - Contains details of order to remove.
+ * @param {Order} order - Contains details of order to remove.
  */
 async function updateMetadataAfterOrderRemoval(db, order) {
 
@@ -156,8 +156,52 @@ async function updateMetadataAfterOrderRemoval(db, order) {
   await db.set("metadata", metadata);
 }
 
+/**
+ * Remove part of the amount from an order in order book database
+ * @param {keyValueStore} db - OrbitDB key value database holding order book.
+ * @param {Order} order - Contains details of order to modify.
+ * @param {int} amount - Amount to deplete order by.
+ */
+async function depleteOrder(db, order, amount) {
+
+	let queue = db.get(order.price);
+
+	if (queue === undefined || queue.length === 0)
+	  throw new Error("InvalidOrder");
+	
+	// Find index of order to remove
+	let i;
+	let found = false;
+	for (i = 0; i < queue.length; i++) {
+	  if (queue[i].timestamp === order.timestamp &&
+	      queue[i].user === order.user &&
+	      queue[i].is_buy === order.is_buy) {
+	    found = true;
+	    break;
+	  }
+	}
+	// Didn't find target order in queue
+	if (!found)
+	  throw new Error("InvalidOrder");
+
+  // Check that order contains sufficient units to perform depletion
+	if (queue[i].amount < amount)
+		throw new Error("InvalidDepletionAmount");
+
+	// Check that depletion amount does not fully deplete order
+	if (queue[i].amount == amount)
+		throw new Error("InvalidDepletionAmount");
+
+  // Deplete amount
+	queue[i].amount -= amount;
+
+	// Put updated queue into database
+	await db.set(order.price, queue);
+}
+
 module.exports = {
   addOrder: addOrder,
   cancelOrder: cancelOrder,
-  Order: Order
+  Order: Order,
+  depleteOrder: depleteOrder
 }
