@@ -4,6 +4,7 @@ let ob_functions = require('./ob_functions');
 let addOrder = ob_functions.addOrder;
 let cancelOrder = ob_functions.cancelOrder;
 let Order = ob_functions.Order;
+let depleteOrder = ob_functions.depleteOrder;
 
 const assert = require('assert');
 const IPFS = require('ipfs');
@@ -29,7 +30,6 @@ ipfs.on('ready', async () => {
 
   // Create OrbitDB instance
   let orbitdb = new OrbitDB(ipfs);
-
   let db = await orbitdb.keyvalue('test-database-1');
 
   await db.put("metadata", {
@@ -177,7 +177,6 @@ ipfs.on('ready', async () => {
 
   // Create OrbitDB instance
   orbitdb = new OrbitDB(ipfs);
-
   db = await orbitdb.keyvalue('test-database-2');
 
   await db.put("metadata", {
@@ -309,4 +308,70 @@ ipfs.on('ready', async () => {
 
   db.close();
 
+
+  // TEST: depleteOrder
+
+  num_tests_failed = 0;
+  num_tests_run = 0;
+  num_tests_passed = 0;
+
+  // Create OrbitDB instance
+  orbitdb = new OrbitDB(ipfs);
+  db = await orbitdb.keyvalue('test-database-2');
+
+  await db.put("metadata", {
+    best_bid: undefined,
+    best_ask: undefined,
+    tick_size: 1,
+    worst_bid: undefined,
+    worst_ask: undefined
+  });
+
+  let ts_k = await addOrder(db, new Order(true, 50, 100, "K", undefined));
+
+  // Test normal behaviour for depleting order
+  num_tests_run++;
+  try {
+    await depleteOrder(db, new Order(true, 50, 100, "K", ts_k), 20)
+    assert.strictEqual(db.get(100)[0].amount, 30);
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: depleteOrder: Test 1");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  // Test attempting to deplete too much from order raises error
+  num_tests_run++;
+  try {
+  	await depleteOrder(db, new Order(true, 50, 100, "K", ts_k), 60).catch(
+  		error => {assert.strictEqual(error.message, "InvalidDepletionAmount")});
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: depleteOrder: Test 2");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  // Test attempting to deplete entire order raises error
+  num_tests_run++;
+  try {
+  	await depleteOrder(db, new Order(true, 50, 100, "K", ts_k), 50).catch(
+  		error => {assert.strictEqual(error.message, "InvalidDepletionAmount")});
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: depleteOrder: Test 3");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  // Compute stats of tests that passed/failed
+  if (num_tests_passed === num_tests_run) {
+    console.log("ALL " + num_tests_run + " depleteOrder TESTS PASSED!");
+  } else {
+    console.log("NOT ALL depleteOrder TESTS PASSED!");
+    console.log(num_tests_passed + " out of " + num_tests_run + " tests passed.");
+  }
+
+  db.close();
 })
