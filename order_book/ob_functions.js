@@ -1,13 +1,13 @@
 "use strict"
 
 class Order {
-	constructor(is_buy, amount, price, user, timestamp) {
-		this.is_buy = is_buy;
-		this.amount = amount;
-		this.price = price;
-		this.user = user;
-		this.timestamp = timestamp;
-	} 
+  constructor(is_buy, amount, price, user, timestamp) {
+    this.is_buy = is_buy;
+    this.amount = amount;
+    this.price = price;
+    this.user = user;
+    this.timestamp = timestamp;
+  } 
 }
 
 /**
@@ -164,39 +164,39 @@ async function updateMetadataAfterOrderRemoval(db, order) {
  */
 async function depleteOrder(db, order, amount) {
 
-	let queue = db.get(order.price);
+  let queue = db.get(order.price);
 
-	if (queue === undefined || queue.length === 0)
-	  throw new Error("InvalidOrder");
-	
-	// Find index of order to remove
-	let i;
-	let found = false;
-	for (i = 0; i < queue.length; i++) {
-	  if (queue[i].timestamp === order.timestamp &&
-	      queue[i].user === order.user &&
-	      queue[i].is_buy === order.is_buy) {
-	    found = true;
-	    break;
-	  }
-	}
-	// Didn't find target order in queue
-	if (!found)
-	  throw new Error("InvalidOrder");
+  if (queue === undefined || queue.length === 0)
+    throw new Error("InvalidOrder");
+  
+  // Find index of order to remove
+  let i;
+  let found = false;
+  for (i = 0; i < queue.length; i++) {
+    if (queue[i].timestamp === order.timestamp &&
+        queue[i].user === order.user &&
+        queue[i].is_buy === order.is_buy) {
+      found = true;
+      break;
+    }
+  }
+  // Didn't find target order in queue
+  if (!found)
+    throw new Error("InvalidOrder");
 
   // Check that order contains sufficient units to perform depletion
-	if (queue[i].amount < amount)
-		throw new Error("InvalidDepletionAmount");
+  if (queue[i].amount < amount)
+    throw new Error("InvalidDepletionAmount");
 
-	// Check that depletion amount does not fully deplete order
-	if (queue[i].amount == amount)
-		throw new Error("InvalidDepletionAmount");
+  // Check that depletion amount does not fully deplete order
+  if (queue[i].amount == amount)
+    throw new Error("InvalidDepletionAmount");
 
   // Deplete amount
-	queue[i].amount -= amount;
+  queue[i].amount -= amount;
 
-	// Put updated queue into database
-	await db.set(order.price, queue);
+  // Put updated queue into database
+  await db.set(order.price, queue);
 }
 
 module.exports = {

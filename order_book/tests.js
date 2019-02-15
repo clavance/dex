@@ -289,8 +289,8 @@ ipfs.on('ready', async () => {
   // Test cancelling non-existent order
   num_tests_run++;
   try {
-  	await cancelOrder(db, new Order(false, 233, 89, "J", ts_i)).catch(
-  		error => {assert.strictEqual(error.message, "InvalidOrder")});
+    await cancelOrder(db, new Order(false, 233, 89, "J", ts_i)).catch(
+      error => {assert.strictEqual(error.message, "InvalidOrder")});
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
@@ -344,8 +344,8 @@ ipfs.on('ready', async () => {
   // Test attempting to deplete too much from order raises error
   num_tests_run++;
   try {
-  	await depleteOrder(db, new Order(true, 50, 100, "K", ts_k), 60).catch(
-  		error => {assert.strictEqual(error.message, "InvalidDepletionAmount")});
+    await depleteOrder(db, new Order(true, 50, 100, "K", ts_k), 60).catch(
+      error => {assert.strictEqual(error.message, "InvalidDepletionAmount")});
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
@@ -356,8 +356,8 @@ ipfs.on('ready', async () => {
   // Test attempting to deplete entire order raises error
   num_tests_run++;
   try {
-  	await depleteOrder(db, new Order(true, 50, 100, "K", ts_k), 50).catch(
-  		error => {assert.strictEqual(error.message, "InvalidDepletionAmount")});
+    await depleteOrder(db, new Order(true, 50, 100, "K", ts_k), 50).catch(
+      error => {assert.strictEqual(error.message, "InvalidDepletionAmount")});
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
