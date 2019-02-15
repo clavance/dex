@@ -54,6 +54,7 @@ ipfs.on('ready', async () => {
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
+    console.log("FAILED: addOrder: Test 1");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
@@ -66,6 +67,7 @@ ipfs.on('ready', async () => {
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
+    console.log("FAILED: addOrder: Test 2");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
@@ -84,6 +86,7 @@ ipfs.on('ready', async () => {
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
+    console.log("FAILED: addOrder: Test 3");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
     
@@ -99,6 +102,7 @@ ipfs.on('ready', async () => {
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
+    console.log("FAILED: addOrder: Test 4");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
@@ -111,6 +115,7 @@ ipfs.on('ready', async () => {
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
+    console.log("FAILED: addOrder: Test 5");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
@@ -123,6 +128,7 @@ ipfs.on('ready', async () => {
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
+    console.log("FAILED: addOrder: Test 6");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
@@ -135,6 +141,7 @@ ipfs.on('ready', async () => {
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
+    console.log("FAILED: addOrder: Test 7");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
@@ -147,6 +154,7 @@ ipfs.on('ready', async () => {
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
+    console.log("FAILED: addOrder: Test 8");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
@@ -191,6 +199,7 @@ ipfs.on('ready', async () => {
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
+    console.log("FAILED: cancelOrder: Test 1");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
@@ -204,6 +213,7 @@ ipfs.on('ready', async () => {
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
+    console.log("FAILED: cancelOrder: Test 2");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
@@ -215,6 +225,7 @@ ipfs.on('ready', async () => {
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
+    console.log("FAILED: cancelOrder: Test 3");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
@@ -229,6 +240,7 @@ ipfs.on('ready', async () => {
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
+    console.log("FAILED: cancelOrder: Test 4");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
@@ -242,6 +254,7 @@ ipfs.on('ready', async () => {
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
+    console.log("FAILED: cancelOrder: Test 5");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
@@ -256,6 +269,7 @@ ipfs.on('ready', async () => {
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
+    console.log("FAILED: cancelOrder: Test 6");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
@@ -269,6 +283,7 @@ ipfs.on('ready', async () => {
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
+    console.log("FAILED: cancelOrder: Test 7");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
@@ -280,6 +295,7 @@ ipfs.on('ready', async () => {
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
+    console.log("FAILED: cancelOrder: Test 8");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
