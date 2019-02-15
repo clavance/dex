@@ -1,31 +1,31 @@
 "use strict"
 
+class Order {
+	constructor(is_buy, amount, price, user, timestamp) {
+		this.is_buy = is_buy;
+		this.amount = amount;
+		this.price = price;
+		this.user = user;
+		this.timestamp = timestamp;
+	} 
+}
+
 /**
  * Add order to order book database, without performing any matching.
  * @param {keyValueStore} db - OrbitDB key value database holding order book.
- * @param {bool} is_buy_in - True if order is a buy order, false otherwise.
- * @param {int} amount_in - Amount of currency to trade.
- * @param {int} price_in - Price at which to trade.
- * @param {string} user_in - Identifies user.
+ * @param {order} Order - Contains details of order to add.
  */
-async function addOrder(db, is_buy_in, amount_in, price_in, user_in) {
+async function addOrder(db, order) {
 
   let order_ts = new Date().getTime();
+  order.timestamp = new Date().getTime();
 
-  const order = {
-    is_buy: is_buy_in,
-    amount: amount_in,
-    price: price_in,
-    timestamp: order_ts,
-    user: user_in
-  }
-
-  if (db.get(price_in) === undefined) {
-    await db.put(price_in, [order]);
+  if (db.get(order.price) === undefined) {
+    await db.put(order.price, [order]);
   } else {
-    let queue = db.get(price_in);
+    let queue = db.get(order.price);
     queue.push(order);
-    await db.set(price_in, queue);
+    await db.set(order.price, queue);
   }
 
   // Update best bid/ask
@@ -52,46 +52,40 @@ async function addOrder(db, is_buy_in, amount_in, price_in, user_in) {
     }
   }
 
-  return order_ts;
+  return order.timestamp;
 }
 
 /**
  * Cancel order in order book database
  * @param {keyValueStore} db - OrbitDB key value database holding order book.
- * @param {int} price - Price at which order was placed.
- * @param {string} user - Identifies user.
- * @param {int} timestamp - Timestamp (unix time) at which order was placed.
- * @param {boolean} is_buy -  true if buy order, false if sell order.
+ * @param {order} Order - Contains details of order to cancel.
  */
-async function cancelOrder(db, price, user, timestamp, is_buy) {
+async function cancelOrder(db, order) {
 
-  await removeOrder(db, price, user, timestamp, is_buy);
+  await removeOrder(db, order);
 
-  await updateMetadataAfterOrderRemoval(db, price, is_buy);
+  await updateMetadataAfterOrderRemoval(db, order);
 }
 
 /**
  * Remove order in order book database
  * @param {keyValueStore} db - OrbitDB key value database holding order book.
- * @param {int} price - Price at which order was placed.
- * @param {string} user - Identifies user.
- * @param {int} timestamp - Timestamp (unix time) at which order was placed.
- * @param {boolean} is_buy -  true if buy order, false if sell order.
+ * @param {order} Order - Contains details of order to remove.
  */
-async function removeOrder(db, price, user, timestamp, is_buy) {
+async function removeOrder(db, order) {
 
-  let queue = db.get(price);
+  let queue = db.get(order.price);
 
   if (queue === undefined || queue.length === 0)
     throw new Error("InvalidOrder");
-
+ 
   // Find index of order to remove
   let i;
   let found = false;
   for (i = 0; i < queue.length; i++) {
-    if (queue[i].timestamp === timestamp &&
-        queue[i].user === user &&
-        queue[i].is_buy === is_buy) {
+    if (queue[i].timestamp === order.timestamp &&
+        queue[i].user === order.user &&
+        queue[i].is_buy === order.is_buy) {
       found = true;
       break;
     }
@@ -104,35 +98,32 @@ async function removeOrder(db, price, user, timestamp, is_buy) {
   queue.splice(i, 1);
 
   // Put updated queue into database
-  await db.set(price, queue);
+  await db.set(order.price, queue);
 }
 
 /**
  * Update metadata fields after removing order from order book database
  * @param {keyValueStore} db - OrbitDB key value database holding order book.
- * @param {int} price - Price at which order was placed.
- * @param {string} user - Identifies user.
- * @param {int} timestamp - Timestamp (unix time) at which order was placed.
- * @param {boolean} is_buy -  true if buy order, false if sell order.
+ * @param {order} Order - Contains details of order to remove.
  */
-async function updateMetadataAfterOrderRemoval(db, price, is_buy) {
+async function updateMetadataAfterOrderRemoval(db, order) {
 
   let metadata = db.get("metadata");
 
   // Return from function if price is not at best/worst bid/ask
-  if (is_buy && price !== metadata.worst_bid && price !== metadata.best_bid)
+  if (order.is_buy && order.price !== metadata.worst_bid && order.price !== metadata.best_bid)
     return;
 
-  if (!is_buy && price !== metadata.worst_ask && price !== metadata.best_ask)
+  if (!order.is_buy && order.price !== metadata.worst_ask && order.price !== metadata.best_ask)
     return;
 
   // Return from function if at least one order at price level
-  if (db.get(price).length > 0)
+  if (db.get(order.price).length > 0)
     return;
 
   // Get start and end prices of range to search through
   let start_price, end_price;
-  if (is_buy) {
+  if (order.is_buy) {
     start_price = metadata.worst_bid;
     end_price = metadata.best_bid;
   } else {
@@ -154,7 +145,7 @@ async function updateMetadataAfterOrderRemoval(db, price, is_buy) {
   }
 
   // Update metadata
-  if (is_buy) {
+  if (order.is_buy) {
     metadata.worst_bid = min_val;
     metadata.best_bid = max_val;
   } else {
@@ -167,5 +158,6 @@ async function updateMetadataAfterOrderRemoval(db, price, is_buy) {
 
 module.exports = {
   addOrder: addOrder,
-  cancelOrder: cancelOrder
+  cancelOrder: cancelOrder,
+  Order: Order
 }

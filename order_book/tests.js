@@ -1,6 +1,9 @@
+"use strict"
+
 let ob_functions = require('./ob_functions');
 let addOrder = ob_functions.addOrder;
 let cancelOrder = ob_functions.cancelOrder;
+let Order = ob_functions.Order;
 
 const assert = require('assert');
 const IPFS = require('ipfs');
@@ -54,7 +57,7 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  await addOrder(db, true, 100, 20, "A");
+  await addOrder(db, new Order(true, 100, 20, "A", undefined));
 
   // Test that length of queue at key 20 is 1, after putting a single order into it
   num_tests_run++;
@@ -75,8 +78,8 @@ ipfs.on('ready', async () => {
       is_buy: true,
       amount: 100,
       price: 20,
-      timestamp: "PASS",
-      user: "A"
+      user: "A",
+      timestamp: "PASS"      
     }));
     num_tests_passed++;
   } catch (err) {
@@ -84,7 +87,7 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
     
-  await addOrder(db, true, 50, 20, "B");
+  await addOrder(db, new Order(true, 50, 20, "B", undefined));
   
   // Test that orders are in correct place in queue, for same key (20)
   num_tests_run++;
@@ -99,7 +102,7 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  await addOrder(db, true, 50, 30, "C");
+  await addOrder(db, new Order(true, 50, 30, "C", undefined));
 
   // Test that best_bid in metadata gets updated when adding new best bid order
   num_tests_run++;
@@ -111,7 +114,7 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  await addOrder(db, false, 50, 60, "D");
+  await addOrder(db, new Order(false, 50, 60, "D", undefined));
 
   // Test that best_ask in metadata gets updated when adding new best ask order
   num_tests_run++;
@@ -123,7 +126,7 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  await addOrder(db, false, 50, 100, "E");
+  await addOrder(db, new Order(false, 50, 100, "E", undefined));
 
   // Test that worst_ask in metadata gets updated when adding new worst ask order
   num_tests_run++;
@@ -135,7 +138,7 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  await addOrder(db, true, 50, 10, "E");
+  await addOrder(db, new Order(true, 50, 10, "F", undefined));
 
   // Test that worst_bid in metadata gets updated when adding new worst bid order
   num_tests_run++;
@@ -177,13 +180,13 @@ ipfs.on('ready', async () => {
     worst_ask: undefined
   });
 
-  let ts_a = await addOrder(db, true, 100, 20, "A");
-  let ts_b = await addOrder(db, true, 50, 20, "B");
+  let ts_a = await addOrder(db, new Order(true, 100, 20, "A", undefined));
+  let ts_b = await addOrder(db, new Order(true, 50, 20, "B", undefined));
 
   // Test cancelling orders within same queue, queue length changes
   num_tests_run++;
   try {
-    await cancelOrder(db, 20, "A", ts_a, true);
+    await cancelOrder(db, new Order(true, 100, 20, "A", ts_a));
     assert.strictEqual(db.get(20).length, 1);
     num_tests_passed++;
   } catch (err) {
@@ -191,12 +194,12 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  let ts_c = await addOrder(db, true, 100, 20, "C");
+  let ts_c = await addOrder(db, new Order(true, 100, 20, "C", undefined));
 
-  // // Test cancelling orders within same queue, correct order gets cancelled
+  // Test cancelling orders within same queue, correct order gets cancelled
   num_tests_run++;
   try {
-    await cancelOrder(db, 20, "B", ts_b, true);
+    await cancelOrder(db, new Order(true, 50, 20, "B", ts_b));
     assert.strictEqual(db.get(20)[0].user, "C");
     num_tests_passed++;
   } catch (err) {
@@ -207,7 +210,7 @@ ipfs.on('ready', async () => {
   // Test cancel last order in queue, queue becomes empty
   num_tests_run++;
   try {
-    await cancelOrder(db, 20, "C", ts_c, true);
+    await cancelOrder(db, new Order(true, 100, 20, "C", ts_c));
     assert.strictEqual(db.get(20).length, 0);
     num_tests_passed++;
   } catch (err) {
@@ -215,13 +218,13 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  let ts_d = await addOrder(db, true, 100, 20, "D");
-  let ts_e = await addOrder(db, true, 100, 30, "E");
+  let ts_d = await addOrder(db, new Order(true, 100, 20, "D", undefined));
+  let ts_e = await addOrder(db, new Order(true, 100, 30, "E", undefined));
 
   // Test best bid changes when deleting best bid order
   num_tests_run++;
   try {
-    await cancelOrder(db, 30, "E", ts_e, true);
+    await cancelOrder(db, new Order(true, 100, 30, "E", ts_e));
     assert.strictEqual(db.get("metadata").best_bid, 20);
     num_tests_passed++;
   } catch (err) {
@@ -229,12 +232,12 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  let ts_f = await addOrder(db, true, 100, 25, "F");
+  let ts_f = await addOrder(db, new Order(true, 100, 25, "F", undefined));
 
   // Test worst bid changes when deleting worst bid order
   num_tests_run++;
   try {
-    await cancelOrder(db, 20, "D", ts_d, true);
+    await cancelOrder(db, new Order(true, 100, 20, "D", ts_d));
     assert.strictEqual(db.get("metadata").worst_bid, 25);
     num_tests_passed++;
   } catch (err) {
@@ -242,13 +245,13 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  let ts_g = await addOrder(db, false, 50, 80, "G");
-  let ts_h = await addOrder(db, false, 50, 100, "H");
+  let ts_g = await addOrder(db, new Order(false, 50, 80, "G", undefined));
+  let ts_h = await addOrder(db, new Order(false, 50, 100, "H", undefined));
 
   // Test best ask changes when deleting best ask order
   num_tests_run++;
   try {
-    await cancelOrder(db, 80, "G", ts_g, false);
+    await cancelOrder(db, new Order(false, 50, 80, "G", ts_g));
     assert.strictEqual(db.get("metadata").best_ask, 100);
     num_tests_passed++;
   } catch (err) {
@@ -256,11 +259,12 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  let ts_i = await addOrder(db, false, 50, 120, "I");
+  let ts_i = await addOrder(db, new Order(false, 50, 120, "I", undefined));
+
   // Test worst ask changes when deleting worst ask order
   num_tests_run++;
   try {
-    await cancelOrder(db, 120, "I", ts_i, false);
+    await cancelOrder(db, new Order(false, 50, 120, "I", ts_i));
     assert.strictEqual(db.get("metadata").worst_ask, 100);
     num_tests_passed++;
   } catch (err) {
@@ -269,12 +273,10 @@ ipfs.on('ready', async () => {
   }
 
   // Test cancelling non-existent order
-    num_tests_run++;
+  num_tests_run++;
   try {
-  	await cancelOrder(db, 89, "J", ts_i, false).catch(
+  	await cancelOrder(db, new Order(false, 233, 89, "J", ts_i)).catch(
   		error => {assert.strictEqual(error.message, "InvalidOrder")});
-    // await cancelOrder(db, 120, "I", ts_i, false);
-    // assert.strictEqual(db.get("metadata").worst_ask, 100);
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
