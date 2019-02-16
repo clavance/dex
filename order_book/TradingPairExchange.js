@@ -22,6 +22,7 @@ class TradingPairExchange {
 
     this.name = name;
     this.ipfs = ipfs;
+    this.trade_queue = [];
   }
 
   async init() {
@@ -56,6 +57,19 @@ class TradingPairExchange {
    */
    static shiftToFloat(num, shift_amount) {
     return num / Math.pow(10, shift_amount);
+   }
+
+   getTradeQueue() {
+    return this.trade_queue;
+   }
+
+   /**
+   * Remove and return first element in queue, if it exists. Otherwise return undefined.
+   */
+   popNextTrade() {
+    if (len(this.trade_queue > 0))
+      return this.trade_queue.shift();
+    return undefined;
    }
 
 
