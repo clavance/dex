@@ -71,7 +71,7 @@ ipfs.on('ready', async () => {
       amount: 100,
       price: 20,
       user: "A",
-      timestamp: "PASS"      
+      timestamp: "PASS"
     }));
     num_tests_passed++;
   } catch (err) {
@@ -79,9 +79,9 @@ ipfs.on('ready', async () => {
     console.log("FAILED: addOrder: Test 3");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
-    
+
   await exchange.addOrder(new Order(true, 50, 20, "B", undefined));
-  
+
   // Test that orders are in correct place in queue, for same key (20)
   num_tests_run++;
   try {
@@ -463,4 +463,34 @@ ipfs.on('ready', async () => {
 
   exchange.db.close();
 
+
+  // TEST matchOrder
+  // Test for buy orders
+
+  num_tests_failed = 0;
+  num_tests_run = 0;
+  num_tests_passed = 0;
+
+  exchange = new TradingPairExchange('test-db-5', ipfs, 1);
+  await exchange.init();
+
+  let ts_m = await exchange.addOrder(new Order(false, 10, 100, "M", undefined));
+  let ts_n = await exchange.addOrder(new Order(false, 10, 100, "N", undefined));
+  let ts_o = await exchange.addOrder(new Order(false, 15, 100, "O", undefined));
+  let ts_p = await exchange.addOrder(new Order(false, 20, 120, "P", undefined));
+
+  // Test that taker order price is too low for matching
+  num_tests_run++;
+  try {
+    let result_q = await exchange.addOrder(new Order(true,20, 90, "Q",undefined));
+    assert.strictEqual(TradingPairExchange.getTradeQueue(), []);
+    assert.strictEqual(result_q.is_buy = true);
+    assert.strictEqual(result_q.amount = 20);
+    assert.strictEqual(result_q.price = 90);
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: matchOrder: Test 1");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
 })
