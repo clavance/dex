@@ -81,7 +81,7 @@ class TradingPairExchange {
       await this.db.set(order.price, queue);
     }
 
-    // Update best bid/ask
+    // Update best/worst bid/ask
     let metadata = this.db.get("metadata");
     if (order.is_buy === true) {
       if ((metadata.best_bid === undefined) || (order.price > metadata.best_bid)) {
