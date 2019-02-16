@@ -87,12 +87,10 @@ class TradingPairExchange {
     order.amount = TradingPairExchange.shiftToInt(order.amount, this.amount_shift);
 
     // Perform order matching
-    let amount_remaining = this.matchOrder(order);
+    this.matchOrder(order);
 
     // Place (rest of) order on book if not fully matched, otherwise no need to add to book
-    if (amount_remaining > 0)
-      order.amount = amount_remaining;
-    else
+    if (order.amount === 0)
       return order.timestamp;
 
     // Add order to book
@@ -276,6 +274,33 @@ class TradingPairExchange {
 
     // Put updated queue into database
     await this.db.set(order.price, queue);
+  }
+
+  /**
+   * Match given order with orders already on order book. Modify existing order
+     book as matches are made, as well as appending to trade queue, for orders
+     yet to be executed on blockchain.
+   * @param {Order} order - Incoming taker order.
+   */
+  matchOrder(taker_order) {
+    let metadata = db.get("metadata");
+
+    // Simple case where order price isn't better than best bid/ask (or no
+    // sell/buy orders exist), so know no matches are possible
+    if (taker_order.is_buy &&
+      (metadata.best_ask === undefined ||
+        taker_order.price < metadata.best_ask)) {
+      return;
+    }
+    if (!taker_order.is_buy &&
+      (metadata.best_bid === undefined ||
+        taker_order.price > metadata.best_bid)) {
+      return;
+    }
+
+
+    
+
   }
 
 
