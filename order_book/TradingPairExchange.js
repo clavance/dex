@@ -9,10 +9,16 @@ class TradingPairExchange {
    * @param {string} name - Name of key-value store in database.
    * @param {IPFS} ipfs - IPFS instance to use.
    * @param {int/float} tick_size (optional) - Minimum distance between price levels.
+   * @param {uint} price_shift (optional) - No. of decimal places to shift prices by,
+     so they can be stored internally as integers. E.g. 10.43, price_shift=2, => 1043
+   * @param {uint} amount_shift (optional) - No. of decimal places to shift amounts by,
+     so they can be stored internally as integers.
    */
-  constructor(name, ipfs, tick_size) {
+  constructor(name, ipfs, tick_size, price_shift, amount_shift) {
     // Populate default parameters
-    this.tick_size = tick_size || 1;
+    this.tick_size = TradingPairExchange.shiftToInt(tick_size, price_shift) || 1;
+    this.price_shift = price_shift || 0;
+    this.amount_shift = amount_shift || 0;
 
     this.name = name;
     this.ipfs = ipfs;
@@ -29,8 +35,29 @@ class TradingPairExchange {
       tick_size: this.tick_size,
       worst_bid: undefined,
       worst_ask: undefined,
+      price_shift: this.price_shift,
+      amount_shift: this.amount_shift
     });
   }
+
+  /**
+   * Shift input by given no. of decimal places, making number bigger.
+   * @param {int/float} num - Number to shift.
+   * @param {int} shift_amount - No. of decimal places to shift by.
+   */
+   static shiftToInt(num, shift_amount) {
+    return Math.round(num * Math.pow(10, shift_amount));
+   }
+
+     /**
+   * Shift input by given no. of decimal places, making number smaller.
+   * @param {int/float} num - Number to shift.
+   * @param {int} shift_amount - No. of decimal places to shift by.
+   */
+   static shiftToFloat(num, shift_amount) {
+    return num / Math.pow(10, shift_amount);
+   }
+
 
   /**
    * Add order to order book database, without performing any matching.
@@ -41,6 +68,10 @@ class TradingPairExchange {
 
     let order_ts = new Date().getTime();
     order.timestamp = new Date().getTime();
+
+    // Shift order values so represented as int internally
+    order.price = TradingPairExchange.shiftToInt(order.price, this.price_shift);
+    order.amount = TradingPairExchange.shiftToInt(order.amount, this.amount_shift);
 
     if (this.db.get(order.price) === undefined) {
       await this.db.put(order.price, [order]);
@@ -69,8 +100,7 @@ class TradingPairExchange {
       }
       if ((metadata.worst_ask === undefined)||(order.price > metadata.worst_ask)) {
         metadata.worst_ask = order.price;
-        await
-        this.db.set("metadata", metadata);
+        await this.db.set("metadata", metadata);
       }
     }
 
@@ -82,6 +112,10 @@ class TradingPairExchange {
    * @param {Order} order - Contains details of order to cancel.
    */
   async cancelOrder(order) {
+
+    // Shift order values so represented as int internally
+    order.price = TradingPairExchange.shiftToInt(order.price, this.price_shift);
+    order.amount = TradingPairExchange.shiftToInt(order.amount, this.amount_shift);
 
     await this.removeOrder(order);
 
@@ -181,6 +215,10 @@ class TradingPairExchange {
    * @param {int} amount - Amount to deplete order by.
    */
   async depleteOrder(order, amount) {
+
+    // Shift order values so represented as int internally
+    order.price = TradingPairExchange.shiftToInt(order.price, this.price_shift);
+    order.amount = TradingPairExchange.shiftToInt(order.amount, this.amount_shift);
 
     let queue = this.db.get(order.price);
 

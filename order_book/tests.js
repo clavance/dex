@@ -37,6 +37,8 @@ ipfs.on('ready', async () => {
       tick_size: 1,
       worst_bid: undefined,
       worst_ask: undefined,
+      price_shift: 0,
+      amount_shift: 0
     }));
     num_tests_passed++;
   } catch (err) {
@@ -339,6 +341,122 @@ ipfs.on('ready', async () => {
     console.log("ALL " + num_tests_run + " depleteOrder TESTS PASSED!");
   } else {
     console.log("NOT ALL depleteOrder TESTS PASSED!");
+    console.log(num_tests_passed + " out of " + num_tests_run + " tests passed.");
+  }
+
+  exchange.db.close();
+
+
+  // TEST: floatIntConversion: storing floats as int functionality
+
+  num_tests_failed = 0;
+  num_tests_run = 0;
+  num_tests_passed = 0;
+
+  exchange = new TradingPairExchange('test-db-4', ipfs, 0.01, 2, 3);
+  await exchange.init();
+
+  let ts_l = await exchange.addOrder(new Order(true, 100.111, 67.70, "L", undefined));
+
+  // Test amount stored correctly internally
+  num_tests_run++;
+  try {
+    assert.strictEqual(exchange.db.get(6770)[0].amount, 100111);
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: floatIntConversion: Test 1");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  // Test price stored correctly internally
+  num_tests_run++;
+  try {
+    assert.strictEqual(exchange.db.get(6770)[0].price, 6770);
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: floatIntConversion: Test 2");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  // Test shiftToInt static method, shifting by same no. of decimals as
+  // accuracy of float
+  num_tests_run++;
+  try {
+    assert.strictEqual(TradingPairExchange.shiftToInt(101.987, 3), 101987);
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: floatIntConversion: Test 3");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  // Test shiftToInt static method, shifting by fewer no. of decimals to
+  // accuracy of float
+  num_tests_run++;
+  try {
+    assert.strictEqual(TradingPairExchange.shiftToInt(101.987, 2), 10199);
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: floatIntConversion: Test 4");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  // Test shiftToInt static method, shifting by greater no. of decimals to
+  // accuracy of float
+  num_tests_run++;
+  try {
+    assert.strictEqual(TradingPairExchange.shiftToInt(101.987, 4), 1019870);
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: floatIntConversion: Test 5");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  // Test shiftToFloat static method, shifting by same no. of decimals as
+  // accuracy of float
+  num_tests_run++;
+  try {
+    assert.strictEqual(TradingPairExchange.shiftToFloat(101987, 3), 101.987);
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: floatIntConversion: Test 6");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  // Test shiftToFloat static method, shifting by fewer no. of decimals to
+  // accuracy of float
+  num_tests_run++;
+  try {
+    assert.strictEqual(TradingPairExchange.shiftToFloat(10199, 2), 101.99);
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: floatIntConversion: Test 7");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  // Test shiftToFloat static method, shifting by greater no. of decimals to
+  // accuracy of float
+  num_tests_run++;
+  try {
+    assert.strictEqual(TradingPairExchange.shiftToFloat(1019870, 4), 101.987);
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: floatIntConversion: Test 8");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  // Compute stats of tests that passed/failed
+  if (num_tests_passed === num_tests_run) {
+    console.log("ALL " + num_tests_run + " floatIntConversion TESTS PASSED!");
+  } else {
+    console.log("NOT ALL floatIntConversion TESTS PASSED!");
     console.log(num_tests_passed + " out of " + num_tests_run + " tests passed.");
   }
 
