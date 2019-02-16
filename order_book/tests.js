@@ -1,6 +1,7 @@
 "use strict"
 
 let Order = require('./Order').Order;
+let Trade = require('./Trade').Trade;
 let TradingPairExchange = require('./TradingPairExchange').TradingPairExchange;
 
 const assert = require('assert');
