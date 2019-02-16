@@ -298,13 +298,56 @@ class TradingPairExchange {
       return;
     }
 
+    // Get price to start searching for order from
+    let current_price;
+    if (taker_order.is_buy)
+      current_price = metadata.best_ask;
+    else
+      current_price = metadata.best_bid;
 
-    
 
+  }
+
+  bookIterator(start_price, end_price, increment) {
+    let current_price = start_price;
+    let db = this.db
+    let current_queue = db.get(current_price);
+
+    const iterator = {
+      next: function() {
+        // Return order at front of current queue, if present
+        if (current_queue.length > 0)
+          return current_queue.shift();
+
+        // Queue depleted, so need to look for next one
+        // Case when we are at final queue, so done
+        if (current_price === end_price)
+          return {done: true}
+
+        // Find next queue
+        do {
+          current_price += increment;
+          current_queue = db.get(current_price);
+        } while (
+          (current_queue === undefined || current_queue.length === 0) &&
+          current_price <= end_price);
+
+        // console.log(current_queue);
+
+        // Check to see if we were unable to find valid queue
+        if (current_queue === undefined || current_queue.length === 0)
+          return {done: true}
+
+        // Found non-empty queue, so return first element
+        return current_queue.shift();
+      }
+    };
+    return iterator;
   }
 
 
 }
+
 
 module.exports = {
   TradingPairExchange: TradingPairExchange
