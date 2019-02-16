@@ -46,22 +46,22 @@ class TradingPairExchange {
    * @param {int/float} num - Number to shift.
    * @param {int} shift_amount - No. of decimal places to shift by.
    */
-   static shiftToInt(num, shift_amount) {
+  static shiftToInt(num, shift_amount) {
     return Math.round(num * Math.pow(10, shift_amount));
-   }
+  }
 
      /**
    * Shift input by given no. of decimal places, making number smaller.
    * @param {int/float} num - Number to shift.
    * @param {int} shift_amount - No. of decimal places to shift by.
    */
-   static shiftToFloat(num, shift_amount) {
+  static shiftToFloat(num, shift_amount) {
     return num / Math.pow(10, shift_amount);
-   }
+  }
 
-   getTradeQueue() {
+  getTradeQueue() {
     return this.trade_queue;
-   }
+  }
 
    /**
    * Remove and return first element in queue, if it exists. Otherwise return undefined.
@@ -71,7 +71,6 @@ class TradingPairExchange {
       return this.trade_queue.shift();
     return undefined;
    }
-
 
   /**
    * Add order to order book database, without performing any matching.
@@ -87,6 +86,16 @@ class TradingPairExchange {
     order.price = TradingPairExchange.shiftToInt(order.price, this.price_shift);
     order.amount = TradingPairExchange.shiftToInt(order.amount, this.amount_shift);
 
+    // Perform order matching
+    let amount_remaining = this.matchOrder(order);
+
+    // Place (rest of) order on book if not fully matched, otherwise no need to add to book
+    if (amount_remaining > 0)
+      order.amount = amount_remaining;
+    else
+      return order.timestamp;
+
+    // Add order to book
     if (this.db.get(order.price) === undefined) {
       await this.db.put(order.price, [order]);
     } else {
