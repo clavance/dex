@@ -482,11 +482,11 @@ ipfs.on('ready', async () => {
   // Test that taker order price is too low for matching.
   num_tests_run++;
   try {
-    // let result_q = await exchange.addOrder(new Order(true,20, 90, "Q",undefined));
+    // let ts_q = await exchange.addOrder(new Order(true, 20, 90, "Q",undefined));
     assert.strictEqual(TradingPairExchange.getTradeQueue(), []);
-    assert.strictEqual(result_q.is_buy = true);
-    assert.strictEqual(result_q.amount = 20);
-    assert.strictEqual(result_q.price = 90);
+    assert.strictEqual(exchange.db.get(90)[0].is_buy = true);
+    assert.strictEqual(exchange.db.get(90)[0].amount = 20);
+    assert.strictEqual(exchange.db.get(90)[0].user = "Q");
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
@@ -510,15 +510,41 @@ ipfs.on('ready', async () => {
       price_shift: 0,
       amount_shift: 0
     }));
-    // let result_a = await exchange.addOrder(new Order(true,20, 90, "A",undefined));
+    // let ts_a = await exchange.addOrder(new Order(true, 20, 90, "A",undefined));
     assert.strictEqual(TradingPairExchange.getTradeQueue(), []);
-    assert.strictEqual(result_q.is_buy = true);
-    assert.strictEqual(result_q.amount = 20);
-    assert.strictEqual(result_q.price = 90);
+    assert.strictEqual(db.get(90)[0].is_buy = true);
+    assert.strictEqual(db.get(90)[0].amount = 20);
+    assert.strictEqual(db.get(90)[0].user = "A");
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
     console.log("FAILED: matchOrder: Test 2");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  // Test the case that matchOrder fully depletes one order
+  exchange = new TradingPairExchange('test-db-7', ipfs, 1);
+  await exchange.init();
+
+  // let ts_a = await exchange.addOrder(new Order(false, 10, 50, "A", undefined));
+  // let ts_b = await exchange.addOrder(new Order(false, 10, 100, "B", undefined));
+  // let ts_c = await exchange.addOrder(new Order(false, 15, 100, "C", undefined));
+  // let ts_d = await exchange.addOrder(new Order(false, 20, 120, "D", undefined));
+
+  num_tests_run++;
+  try {
+    // let ts_e = await exchange.addOrder(new Order(true, 20, 120, "E",undefined));
+    let TradeQueue = TradingPairExchange.getTradeQueue();
+    assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 20, 120, "D", ts_d));
+    assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 20, 120, "E", ts_e));
+    assert.strictEqual(db.get(50)[0].amount = 10);
+    assert.strictEqual(db.get(100)[0].amount = 10);
+    assert.strictEqual(db.get(100)[1].amount = 15);
+    assert.strictEqual(db.get(120)[0] = undefined);   //this might be wrong
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: matchOrder: Test 3");
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 })
