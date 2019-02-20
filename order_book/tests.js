@@ -48,7 +48,7 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  // await exchange.addOrder(new Order(true, 100, 20, "A", undefined));
+  await exchange.addOrder(new Order(true, 100, 20, "A", undefined));
 
   // Test that length of queue at key 20 is 1, after putting a single order into it
   num_tests_run++;
@@ -80,7 +80,7 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  // await exchange.addOrder(new Order(true, 50, 20, "B", undefined));
+  await exchange.addOrder(new Order(true, 50, 20, "B", undefined));
 
   // Test that orders are in correct place in queue, for same key (20)
   num_tests_run++;
@@ -96,7 +96,7 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  // await exchange.addOrder(new Order(true, 50, 30, "C", undefined));
+  await exchange.addOrder(new Order(true, 50, 30, "C", undefined));
 
   // Test that best_bid in metadata gets updated when adding new best bid order
   num_tests_run++;
@@ -109,7 +109,7 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  // await exchange.addOrder(new Order(false, 50, 60, "D", undefined));
+  await exchange.addOrder(new Order(false, 50, 60, "D", undefined));
 
   // Test that best_ask in metadata gets updated when adding new best ask order
   num_tests_run++;
@@ -122,7 +122,7 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  // await exchange.addOrder(new Order(false, 50, 100, "E", undefined));
+  await exchange.addOrder(new Order(false, 50, 100, "E", undefined));
 
   // Test that worst_ask in metadata gets updated when adding new worst ask order
   num_tests_run++;
@@ -135,7 +135,7 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  // await exchange.addOrder(new Order(true, 50, 10, "F", undefined));
+  await exchange.addOrder(new Order(true, 50, 10, "F", undefined));
 
   // Test that worst_bid in metadata gets updated when adding new worst bid order
   num_tests_run++;
@@ -168,8 +168,8 @@ ipfs.on('ready', async () => {
   exchange = new TradingPairExchange('test-db-2', ipfs, 1);
   await exchange.init();
 
-  // let ts_a = await exchange.addOrder(new Order(true, 100, 20, "A", undefined));
-  // let ts_b = await exchange.addOrder(new Order(true, 50, 20, "B", undefined));
+  let ts_a = await exchange.addOrder(new Order(true, 100, 20, "A", undefined));
+  let ts_b = await exchange.addOrder(new Order(true, 50, 20, "B", undefined));
 
   // Test cancelling orders within same queue, queue length changes
   num_tests_run++;
@@ -183,7 +183,7 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  // let ts_c = await exchange.addOrder(new Order(true, 100, 20, "C", undefined));
+  let ts_c = await exchange.addOrder(new Order(true, 100, 20, "C", undefined));
 
   // Test cancelling orders within same queue, correct order gets cancelled
   num_tests_run++;
@@ -209,8 +209,8 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  // let ts_d = await exchange.addOrder(new Order(true, 100, 20, "D", undefined));
-  // let ts_e = await exchange.addOrder(new Order(true, 100, 30, "E", undefined));
+  let ts_d = await exchange.addOrder(new Order(true, 100, 20, "D", undefined));
+  let ts_e = await exchange.addOrder(new Order(true, 100, 30, "E", undefined));
 
   // Test best bid changes when deleting best bid order
   num_tests_run++;
@@ -224,7 +224,7 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  // let ts_f = await exchange.addOrder(new Order(true, 100, 25, "F", undefined));
+  let ts_f = await exchange.addOrder(new Order(true, 100, 25, "F", undefined));
 
   // Test worst bid changes when deleting worst bid order
   num_tests_run++;
@@ -238,8 +238,8 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  // let ts_g = await exchange.addOrder(new Order(false, 50, 80, "G", undefined));
-  // let ts_h = await exchange.addOrder(new Order(false, 50, 100, "H", undefined));
+  let ts_g = await exchange.addOrder(new Order(false, 50, 80, "G", undefined));
+  let ts_h = await exchange.addOrder(new Order(false, 50, 100, "H", undefined));
 
   // Test best ask changes when deleting best ask order
   num_tests_run++;
@@ -253,7 +253,7 @@ ipfs.on('ready', async () => {
     console.log(err.name, ": ", err.actual, err.operator, err.expected);
   }
 
-  // let ts_i = await exchange.addOrder(new Order(false, 50, 120, "I", undefined));
+  let ts_i = await exchange.addOrder(new Order(false, 50, 120, "I", undefined));
 
   // Test worst ask changes when deleting worst ask order
   num_tests_run++;
@@ -299,7 +299,7 @@ ipfs.on('ready', async () => {
   exchange = new TradingPairExchange('test-db-3', ipfs, 1);
   await exchange.init();
 
-  // let ts_k = await exchange.addOrder(new Order(true, 50, 100, "K", undefined));
+  let ts_k = await exchange.addOrder(new Order(true, 50, 100, "K", undefined));
 
   // Test normal behaviour for depleting order
   num_tests_run++;
@@ -357,7 +357,7 @@ ipfs.on('ready', async () => {
   exchange = new TradingPairExchange('test-db-4', ipfs, 0.01, 2, 3);
   await exchange.init();
 
-  // let ts_l = await exchange.addOrder(new Order(true, 100.111, 67.70, "L", undefined));
+  let ts_l = await exchange.addOrder(new Order(true, 100.111, 67.70, "L", undefined));
 
   // Test amount stored correctly internally
   num_tests_run++;
@@ -474,19 +474,20 @@ ipfs.on('ready', async () => {
   exchange = new TradingPairExchange('test-db-5', ipfs, 1);
   await exchange.init();
 
-  // let ts_m = await exchange.addOrder(new Order(false, 10, 100, "M", undefined));
-  // let ts_n = await exchange.addOrder(new Order(false, 10, 100, "N", undefined));
-  // let ts_o = await exchange.addOrder(new Order(false, 15, 100, "O", undefined));
-  // let ts_p = await exchange.addOrder(new Order(false, 20, 120, "P", undefined));
+  let ts_1 = await exchange.addOrder(new Order(false, 10, 100, "#1", undefined));
+  let ts_2 = await exchange.addOrder(new Order(false, 10, 100, "#2", undefined));
+  let ts_3 = await exchange.addOrder(new Order(false, 15, 100, "#3", undefined));
+  let ts_4 = await exchange.addOrder(new Order(false, 20, 120, "#4", undefined));
 
   // Test that taker order price is too low for matching.
   num_tests_run++;
   try {
-    // let ts_q = await exchange.addOrder(new Order(true, 20, 90, "Q",undefined));
+    let ts_5 = await exchange.addOrder(new Order(true, 20, 90, "#5", undefined));
+    await exchange.matchOrder(new Order(true, 20, 90, "#5", ts_5));
     assert.strictEqual(TradingPairExchange.getTradeQueue(), []);
     assert.strictEqual(exchange.db.get(90)[0].is_buy = true);
     assert.strictEqual(exchange.db.get(90)[0].amount = 20);
-    assert.strictEqual(exchange.db.get(90)[0].user = "Q");
+    assert.strictEqual(exchange.db.get(90)[0].user = "#5");
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
@@ -510,11 +511,12 @@ ipfs.on('ready', async () => {
       price_shift: 0,
       amount_shift: 0
     }));
-    // let ts_a = await exchange.addOrder(new Order(true, 20, 90, "A",undefined));
+    let ts_6 = await exchange.addOrder(new Order(false, 20, 90, "#6", undefined));
+    await exchange.matchOrder(new Order(true, 20, 90, "#6", ts_6))
     assert.strictEqual(TradingPairExchange.getTradeQueue(), []);
     assert.strictEqual(exchange.db.get(90)[0].is_buy = true);
     assert.strictEqual(exchange.db.get(90)[0].amount = 20);
-    assert.strictEqual(exchange.db.get(90)[0].user = "A");
+    assert.strictEqual(exchange.db.get(90)[0].user = "#6");
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
@@ -526,17 +528,18 @@ ipfs.on('ready', async () => {
   exchange = new TradingPairExchange('test-db-7', ipfs, 1);
   await exchange.init();
 
-  // let ts_a = await exchange.addOrder(new Order(false, 10, 50, "A", undefined));
-  // let ts_b = await exchange.addOrder(new Order(false, 10, 100, "B", undefined));
-  // let ts_c = await exchange.addOrder(new Order(false, 15, 100, "C", undefined));
-  // let ts_d = await exchange.addOrder(new Order(false, 20, 120, "D", undefined));
+  let ts_7 = await exchange.addOrder(new Order(false, 10, 50, "#7", undefined));
+  let ts_8 = await exchange.addOrder(new Order(false, 10, 100, "#8", undefined));
+  let ts_9 = await exchange.addOrder(new Order(false, 15, 100, "#9", undefined));
+  let ts_10 = await exchange.addOrder(new Order(false, 20, 120, "#10", undefined));
 
   num_tests_run++;
   try {
-    // let ts_e = await exchange.addOrder(new Order(true, 20, 120, "E",undefined));
+    let ts_11 = await exchange.addOrder(new Order(true, 20, 120, "#11",undefined));
+    await exchange.matchOrder(new Order(true, 20, 120, "#11", ts_11));
     let TradeQueue = TradingPairExchange.getTradeQueue();
-    assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 20, 120, "D", ts_d));
-    assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 20, 120, "E", ts_e));
+    assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 20, 120, "#10", ts_d));
+    assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 20, 120, "#11", ts_e));
     assert.strictEqual(exchange.db.get(50)[0].amount = 10);
     assert.strictEqual(exchange.db.get(100)[0].amount = 10);
     assert.strictEqual(exchange.db.get(100)[1].amount = 15);
@@ -552,23 +555,24 @@ ipfs.on('ready', async () => {
   exchange = new TradingPairExchange('test-db-8', ipfs, 1);
   await exchange.init();
 
-  // let ts_a = await exchange.addOrder(new Order(false, 10, 50, "A", undefined));
-  // let ts_b = await exchange.addOrder(new Order(false, 10, 100, "B", undefined));
-  // let ts_c = await exchange.addOrder(new Order(false, 15, 100, "C", undefined));
-  // let ts_d = await exchange.addOrder(new Order(false, 20, 120, "D", undefined));
+  let ts_12 = await exchange.addOrder(new Order(false, 10, 50, "#12", undefined));
+  let ts_13 = await exchange.addOrder(new Order(false, 10, 100, "#13", undefined));
+  let ts_14 = await exchange.addOrder(new Order(false, 15, 100, "#14", undefined));
+  let ts_15 = await exchange.addOrder(new Order(false, 20, 120, "#15", undefined));
 
   num_tests_run++;
   try {
-    // let ts_e = await exchange.addOrder(new Order(true, 9, 120, "E",undefined));
+    let ts_16 = await exchange.addOrder(new Order(true, 9, 120, "#16",undefined));
+    await exchange.matchOrder(new Order(true, 9, 120, "#16", ts_16));
     let TradeQueue = TradingPairExchange.getTradeQueue();
-    assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 9, 120, "D", ts_d));
-    assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 9, 120, "E", ts_e));
+    assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 9, 120, "#15", ts_15));
+    assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 9, 120, "#16", ts_16));
     assert.strictEqual(exchange.db.get(50)[0].amount = 10);
     assert.strictEqual(exchange.db.get(100)[0].amount = 10);
     assert.strictEqual(exchange.db.get(100)[1].amount = 15);
     assert.strictEqual(exchange.db.get(120)[0].amount = 11);
     assert.strictEqual(exchange.db.get(120)[0].is_buy = false);
-    assert.strictEqual(exchange.db.get(120)[0].user = "D");
+    assert.strictEqual(exchange.db.get(120)[0].user = "#15");
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
