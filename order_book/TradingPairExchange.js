@@ -3,7 +3,7 @@
 const OrbitDB = require('orbit-db');
 
 class TradingPairExchange {
-  
+
   /**
    * Initialise object with orbit db instance, and populated metadata fields.
    * @param {string} name - Name of key-value store in database.
@@ -131,12 +131,16 @@ class TradingPairExchange {
   /**
    * Cancel order in order book database
    * @param {Order} order - Contains details of order to cancel.
+   * @param {int} custom_shift_amount - Set if want to use non-standard shift
+     amount, e.g. 0 if no shifting necessary.
    */
-  async cancelOrder(order) {
+  async cancelOrder(order, custom_shift_amount) {
 
     // Shift order values so represented as int internally
-    order.price = TradingPairExchange.shiftToInt(order.price, this.price_shift);
-    order.amount = TradingPairExchange.shiftToInt(order.amount, this.amount_shift);
+    order.price = TradingPairExchange.shiftToInt(
+      order.price, custom_shift_amount || this.price_shift);
+    order.amount = TradingPairExchange.shiftToInt(
+      order.amount, custom_shift_amount || this.amount_shift);
 
     await this.removeOrder(order);
 
@@ -234,12 +238,15 @@ class TradingPairExchange {
    * Remove part of the amount from an order in order book database
    * @param {Order} order - Contains details of order to modify.
    * @param {int} amount - Amount to deplete order by.
+   * @param {int} custom_shift_amount - Set if want to use non-standard shift
+     amount, e.g. 0 if no shifting necessary.
    */
-  async depleteOrder(order, amount) {
-
+  async depleteOrder(order, amount, custom_shift_amount) {
     // Shift order values so represented as int internally
-    order.price = TradingPairExchange.shiftToInt(order.price, this.price_shift);
-    order.amount = TradingPairExchange.shiftToInt(order.amount, this.amount_shift);
+    order.price = TradingPairExchange.shiftToInt(
+      order.price, custom_shift_amount || this.price_shift);
+    order.amount = TradingPairExchange.shiftToInt(
+      order.amount, custom_shift_amount || this.amount_shift);
 
     let queue = this.db.get(order.price);
 
@@ -280,32 +287,116 @@ class TradingPairExchange {
    * Match given order with orders already on order book. Modify existing order
      book as matches are made, as well as appending to trade queue, for orders
      yet to be executed on blockchain.
-   * @param {Order} order - Incoming taker order.
+   * @param {Order} taker_order - Incoming taker order.
    */
   matchOrder(taker_order) {
-    let metadata = db.get("metadata");
+    if (!this.matchingOrdersExist(taker_order))
+      return;
+
+    iter_params = this.getIterationParams(!taker_order.is_buy);
+
+    // Iterate through potential matching orders
+    let iter = exchange.bookIterator(
+      iter_params[0], iter_params[1], iter_params[2]);
+    let maker_order = this.shallowCopy(it.next());
+    let trade, temp_taker_order;
+    while (!maker_order.done) {
+      if (this.priceValid(taker_order, maker_order)) {
+
+        // Prepare taker order for putting into trade
+        temp_taker_order = this.shallowCopy(taker_order);
+        temp_taker_order.price = maker_order.price;
+
+        if (maker_order.amount > taker_order.amount) {
+          this.depleteOrder(maker_order, taker_order.amount, 0);
+          maker_order.amount = taker_order.amount;
+        } else {
+          this.cancelOrder(maker_order, 0);
+          temp_taker_order.amount = maker_order.amount;
+          taker_order.amount -= maker_order.amount;
+        }
+
+        // Make Trade
+        trade = new Trade(maker_order, temp_taker_order);
+
+        // Append trade to trade queue
+        this.trade_queue.push(trade);
+
+      } else {
+        // Price too high/low, so no more matching orders
+        break;
+      }
+
+    	// Get next order, creating a copy
+    	maker_order = this.shallowCopy(it.next());
+    }
+  }
+
+  /**
+   * Check if price is valid such that maker and taker orders can match against
+     each other.
+   * @param {Order} taker_order - Incoming taker order.
+   * @param {Order} maker_order - Incoming maker order.
+   */
+  priceValid(taker_order, maker_order) {
+    if (taker_order.is_buy && maker_order.price <= taker_order.price)
+      return true;
+    if (!taker_order.is_buy && maker_order.price >= taker_order.price)
+      return true;
+    return false;
+  }
+
+  /**
+   * Create shallow copy of object, assuming no functions are called within
+     object
+   * @param {Object} obj - Object to copy.
+   */
+  shallowCopy(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+ 
+
+  /**
+   * Check if any matching order exist, using best bid/ask
+   * @param {Order} taker_order - Incoming taker order.
+   */
+  matchingOrdersExist(taker_order) {
+    let metadata = this.db.get("metadata");
 
     // Simple case where order price isn't better than best bid/ask (or no
     // sell/buy orders exist), so know no matches are possible
     if (taker_order.is_buy &&
       (metadata.best_ask === undefined ||
         taker_order.price < metadata.best_ask)) {
-      return;
+      return false;
     }
     if (!taker_order.is_buy &&
       (metadata.best_bid === undefined ||
         taker_order.price > metadata.best_bid)) {
-      return;
+      return false;
     }
+    return true;
+  }
 
-    // Get price to start searching for order from
-    let current_price;
-    if (taker_order.is_buy)
-      current_price = metadata.best_ask;
-    else
-      current_price = metadata.best_bid;
+  /**
+   * Get parameters for iterating through either bids or asks, from best to
+     worst.
+   * @param {bool} get_bids - True if want to iterate through bids, false for
+     asks
+   */
+  getIterationParams(get_bids) {
+    let metadata = this.db.get("metadata");
 
-
+    if (taker_order.is_buy) {
+      start_price = metadata.best_ask;
+      end_price = metadata.worst_ask;
+      increment = metadata.tick_size;
+    } else {
+      start_price = metadata.best_bid;
+      end_price = metadata.worst_bid;
+      increment = metadata.tick_size * -1;
+    }
+    return [start_price, end_price, increment];
   }
 
   bookIterator(start_price, end_price, increment) {
@@ -331,8 +422,6 @@ class TradingPairExchange {
         } while (
           (current_queue === undefined || current_queue.length === 0) &&
           current_price <= end_price);
-
-        // console.log(current_queue);
 
         // Check to see if we were unable to find valid queue
         if (current_queue === undefined || current_queue.length === 0)
