@@ -484,7 +484,7 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(true, 20, 90, "#5", undefined);
     let ts_5 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     assert.strictEqual(TradingPairExchange.getTradeQueue(), []);
     assert.strictEqual(exchange.db.get(90)[0].is_buy = true);
     assert.strictEqual(exchange.db.get(90)[0].amount = 20);
@@ -505,18 +505,18 @@ ipfs.on('ready', async () => {
   num_tests_run++;
   try {
     let result = exchange.db.get("metadata");
-    assert.strictEqual(JSON.stringify(result), JSON.stringify({
-      best_bid: undefined,
-      best_ask: undefined,
-      tick_size: 1,
-      worst_bid: undefined,
-      worst_ask: undefined,
-      price_shift: 0,
-      amount_shift: 0
-    }));
+    // assert.strictEqual(JSON.stringify(result), JSON.stringify({
+    //   best_bid: undefined,
+    //   best_ask: undefined,
+    //   tick_size: 1,
+    //   worst_bid: undefined,
+    //   worst_ask: undefined,
+    //   price_shift: 0,
+    //   amount_shift: 0
+    // }));
     Order = new Order(true, 20, 90, "#6", undefined);
     let ts_6 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     assert.strictEqual(TradingPairExchange.getTradeQueue(), []);
     assert.strictEqual(exchange.db.get(90)[0].is_buy = true);
     assert.strictEqual(exchange.db.get(90)[0].amount = 20);
@@ -541,12 +541,12 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(true, 10, 50, "#9",undefined);
     let ts_9 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     let TradeQueue = TradingPairExchange.getTradeQueue();
     assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 10, 50, "#7", ts_7));
     assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 10, 50, "#9", ts_9));
-    assert.strictEqual(exchange.db.get(50)[0].amount = undefined);  //this might be wrong
-    assert.strictEqual(exchange.db.get(100)[0].amount = 10);
+    assert.strictEqual(exchange.db.get(50).length, 0);
+    assert.strictEqual(exchange.db.get(100)[0], new Order(false, 10, 100, "#8", ts_8));
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
@@ -567,15 +567,16 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(true, 9, 50, "#12",undefined);
     let ts_12 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     let TradeQueue = TradingPairExchange.getTradeQueue();
     assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 9, 50, "#10", ts_10));
     assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 9, 50, "#12", ts_12));
 
-    assert.strictEqual(exchange.db.get(50)[0].amount = 11);
-    assert.strictEqual(exchange.db.get(50)[0].is_buy = false);
-    assert.strictEqual(exchange.db.get(50)[0].user = "#10");
-    assert.strictEqual(exchange.db.get(100)[0].amount = 10);
+    assert.strictEqual(exchange.db.get(50)[0].amount, new Order(false, 11, 50, "#10", ts_10));
+    assert.strictEqual(exchange.db.get(100)[0].amount, new Order(false, 10, 100, "#11", ts_11));
+    // assert.strictEqual(exchange.db.get(50)[0].is_buy = false);
+    // assert.strictEqual(exchange.db.get(50)[0].user = "#10");
+    // assert.strictEqual(exchange.db.get(100)[0].amount = 10);
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
@@ -598,17 +599,21 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(true, 20, 100, "#16",undefined);
     let ts_16 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     let TradeQueue = TradingPairExchange.getTradeQueue();
     assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 10, 100, "#13", ts_13));
     assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 10, 100, "#16", ts_16));
     assert.strictEqual(TradeQueue[1].maker_order, new Order(false, 10, 100, "#14", ts_14));
     assert.strictEqual(TradeQueue[1].taker_order, new Order(true, 10, 100, "#16", ts_16));
 
-    assert.strictEqual(exchange.db.get(100)[0].amount = 5);
-    assert.strictEqual(exchange.db.get(100)[0].user = "#14");
-    assert.strictEqual(exchange.db.get(100)[0].is_buy = false);
-    assert.strictEqual(exchange.db.get(120)[0].amount = 20);
+    assert.strictEqual(exchange.db.get(100).length, 1);
+
+    assert.strictEqual(exchange.db.get(100)[0], new Order(false, 5, 100, "#14", ts_14));
+    assert.strictEqual(exchange.db.get(120)[0], new Order(false, 20, 120, "#15", ts_15));
+    // assert.strictEqual(exchange.db.get(100)[0].user = "#14");
+    // assert.strictEqual(exchange.db.get(100)[0].user = "#14");
+    // assert.strictEqual(exchange.db.get(100)[0].is_buy = false);
+    // assert.strictEqual(exchange.db.get(120)[0].amount = 20);
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
@@ -630,9 +635,9 @@ ipfs.on('ready', async () => {
   // entire queue of maker orders exactly.
   num_tests_run++;
   try {
-    Order = new Order(true, 35, 100, "#21",undefined);
+    Order = new Order(true, 35, 100, "#21", undefined);
     let ts_21 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     let TradeQueue = TradingPairExchange.getTradeQueue();
     assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 10, 100, "#17", ts_17));
     assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 10, 100, "#21", ts_21));
@@ -641,8 +646,8 @@ ipfs.on('ready', async () => {
     assert.strictEqual(TradeQueue[2].maker_order, new Order(false, 15, 100, "#19", ts_19));
     assert.strictEqual(TradeQueue[2].taker_order, new Order(true, 15, 100, "#21", ts_21));
 
-    assert.strictEqual(exchange.db.get(100)[0].amount = undefined);
-    assert.strictEqual(exchange.db.get(120)[0].amount = 20);
+    assert.strictEqual(exchange.db.get(100).length, 0);
+    assert.strictEqual(exchange.db.get(120)[0], new Order(false, 20, 120, "#20", ts_20));
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
@@ -665,7 +670,7 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(true, 30, 120, "#24",undefined);
     let ts_24 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     let TradeQueue = TradingPairExchange.getTradeQueue();
     assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 10, 100, "#21", ts_21));
     assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 10, 100, "#24", ts_24));
@@ -699,7 +704,7 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(true, 40, 120, "#28",undefined);
     let ts_28 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     let TradeQueue = TradingPairExchange.getTradeQueue();
     assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 10, 100, "#25", ts_25));
     assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 10, 120, "#28", ts_28));
@@ -733,7 +738,7 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(true, 50, 120, "#32",undefined);
     let ts_32 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     let TradeQueue = TradingPairExchange.getTradeQueue();
     assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 10, 100, "#29", ts_29));
     assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 10, 120, "#32", ts_32));
@@ -767,7 +772,7 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(true, 10, 100, "#35",undefined);
     let ts_35 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     assert.strictEqual(exchange.db.get("metadata").best_ask, 110);
     num_tests_passed++;
   } catch (err) {
@@ -803,7 +808,7 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(false, 10, 120, "#38", undefined);
     let ts_38 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     assert.strictEqual(TradingPairExchange.getTradeQueue(), []);
     assert.strictEqual(exchange.db.get(120)[0].is_buy = false);
     assert.strictEqual(exchange.db.get(120)[0].amount = 10);
@@ -835,7 +840,7 @@ ipfs.on('ready', async () => {
     }));
     Order = new Order(false, 20, 90, "#39", undefined);
     let ts_39 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     assert.strictEqual(TradingPairExchange.getTradeQueue(), []);
     assert.strictEqual(exchange.db.get(90)[0].is_buy = false);
     assert.strictEqual(exchange.db.get(90)[0].amount = 20);
@@ -860,7 +865,7 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(false, 10, 100, "#42",undefined);
     let ts_42 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     let TradeQueue = TradingPairExchange.getTradeQueue();
     assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 10, 100, "#42", ts42));
     assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 10, 100, "#41", ts_41));
@@ -886,7 +891,7 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(false, 5, 100, "#45",undefined);
     let ts_45 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     let TradeQueue = TradingPairExchange.getTradeQueue();
     assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 5, 100, "#45", ts_45));
     assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 5, 100, "#44", ts_44));
@@ -917,7 +922,7 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(false, 20, 120, "#49",undefined);
     let ts_49 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     let TradeQueue = TradingPairExchange.getTradeQueue();
     assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 15, 120, "#49", ts_49));
     assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 15, 120, "#47", ts_47));
@@ -950,7 +955,7 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(true, 35, 120, "#54",undefined);
     let ts_54 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     let TradeQueue = TradingPairExchange.getTradeQueue();
     assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 15, 120, "#54", ts_54));
     assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 15, 120, "#51", ts_51));
@@ -983,7 +988,7 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(false, 35, 100, "#58",undefined);
     let ts_58 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     let TradeQueue = TradingPairExchange.getTradeQueue();
     assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 20, 100, "#58", ts_58));
     assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 20, 120, "#57", ts_57));
@@ -1017,7 +1022,7 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(false, 40, 100, "#62",undefined);
     let ts_62 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     let TradeQueue = TradingPairExchange.getTradeQueue();
     assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 20, 100, "#62", ts_62));
     assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 20, 120, "#61", ts_61));
@@ -1051,7 +1056,7 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(false, 50, 100, "#66",undefined);
     let ts_66 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     let TradeQueue = TradingPairExchange.getTradeQueue();
     assert.strictEqual(TradeQueue[0].maker_order, new Order(false, 20, 100, "#66", ts_66));
     assert.strictEqual(TradeQueue[0].taker_order, new Order(true, 20, 120, "#65", ts_65));
@@ -1085,7 +1090,7 @@ ipfs.on('ready', async () => {
   try {
     Order = new Order(false, 10, 110, "#69",undefined);
     let ts_69 = await exchange.addOrder(Order);
-    await exchange.matchOrder(Order);
+    // await exchange.matchOrder(Order);
     assert.strictEqual(exchange.db.get("metadata").best_bid, 100);
     num_tests_passed++;
   } catch (err) {
