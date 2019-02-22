@@ -1,6 +1,8 @@
 "use strict"
 
 const OrbitDB = require('orbit-db');
+let Trade = require('./Trade').Trade;
+let Order = require('./Order').Order;
 
 class TradingPairExchange {
 
@@ -87,7 +89,7 @@ class TradingPairExchange {
     order.amount = TradingPairExchange.shiftToInt(order.amount, this.amount_shift);
 
     // Perform order matching
-    this.matchOrder(order);
+    await this.matchOrder(order);
 
     // Place (rest of) order on book if not fully matched, otherwise no need to add to book
     if (order.amount === 0)
@@ -289,35 +291,42 @@ class TradingPairExchange {
      yet to be executed on blockchain.
    * @param {Order} taker_order - Incoming taker order.
    */
-  matchOrder(taker_order) {
+  async matchOrder(taker_order) {
     if (!this.matchingOrdersExist(taker_order))
       return;
 
-    iter_params = this.getIterationParams(!taker_order.is_buy);
+    let orders_to_cancel = []  // store orders to be cancelled later (to
+    // avoid changing data while iterating over it)
+
+    let iter_params = this.getIterationParams(!taker_order.is_buy);
 
     // Iterate through potential matching orders
-    let iter = exchange.bookIterator(
+    let iter = this.bookIterator(
       iter_params[0], iter_params[1], iter_params[2]);
-    let maker_order = this.shallowCopy(it.next());
-    let trade, temp_taker_order;
-    while (!maker_order.done) {
+    let maker_order = this.shallowCopy(iter.next());
+    let trade, trade_taker_order, trade_maker_order;
+    while (!maker_order.done && taker_order.amount > 0) {
+
       if (this.priceValid(taker_order, maker_order)) {
 
-        // Prepare taker order for putting into trade
-        temp_taker_order = this.shallowCopy(taker_order);
-        temp_taker_order.price = maker_order.price;
+        // Prepare maker and taker orders for putting into trade
+        trade_taker_order = this.shallowCopy(taker_order);
+        trade_maker_order = this.shallowCopy(maker_order);
+        trade_taker_order.price = this.shallowCopy(trade_maker_order.price);
 
         if (maker_order.amount > taker_order.amount) {
-          this.depleteOrder(maker_order, taker_order.amount, 0);
-          maker_order.amount = taker_order.amount;
+          await this.depleteOrder(maker_order, taker_order.amount, 0);
+          trade_maker_order.amount = this.shallowCopy(taker_order.amount);
+          taker_order.amount = 0;
+
         } else {
-          this.cancelOrder(maker_order, 0);
-          temp_taker_order.amount = maker_order.amount;
-          taker_order.amount -= maker_order.amount;
+          orders_to_cancel.push(this.shallowCopy(maker_order));
+          trade_taker_order.amount = this.shallowCopy(trade_maker_order.amount);
+          taker_order.amount -= this.shallowCopy(maker_order.amount);
         }
 
         // Make Trade
-        trade = new Trade(maker_order, temp_taker_order);
+        trade = new Trade(trade_maker_order, trade_taker_order);
 
         // Append trade to trade queue
         this.trade_queue.push(trade);
@@ -327,8 +336,13 @@ class TradingPairExchange {
         break;
       }
 
-    	// Get next order, creating a copy
-    	maker_order = this.shallowCopy(it.next());
+      // Get next order, creating a copy
+      maker_order = this.shallowCopy(iter.next());
+    }
+
+    // Cancel all outstanding orders
+    for (let i = 0; i < orders_to_cancel.length; i++) {
+      await this.cancelOrder(orders_to_cancel[i], 0);
     }
   }
 
@@ -386,8 +400,9 @@ class TradingPairExchange {
    */
   getIterationParams(get_bids) {
     let metadata = this.db.get("metadata");
+    let start_price, end_price, increment;
 
-    if (taker_order.is_buy) {
+    if (!get_bids) {
       start_price = metadata.best_ask;
       end_price = metadata.worst_ask;
       increment = metadata.tick_size;
@@ -403,12 +418,15 @@ class TradingPairExchange {
     let current_price = start_price;
     let db = this.db
     let current_queue = db.get(current_price);
+    let current_index = 0;
 
     const iterator = {
       next: function() {
         // Return order at front of current queue, if present
-        if (current_queue.length > 0)
-          return current_queue.shift();
+        if (current_index < current_queue.length) {
+          current_index += 1;
+          return current_queue[current_index - 1];
+        }
 
         // Queue depleted, so need to look for next one
         // Case when we are at final queue, so done
@@ -428,7 +446,13 @@ class TradingPairExchange {
           return {done: true}
 
         // Found non-empty queue, so return first element
-        return current_queue.shift();
+        current_index = 1;
+        return current_queue[0];
+      },
+
+      current: function() {
+        // Return current item
+        return current_queue[current_index - 1];
       }
     };
     return iterator;
