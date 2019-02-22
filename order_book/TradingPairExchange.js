@@ -439,7 +439,7 @@ class TradingPairExchange {
           current_queue = db.get(current_price);
         } while (
           (current_queue === undefined || current_queue.length === 0) &&
-          current_price <= end_price);
+          current_price != end_price);
 
         // Check to see if we were unable to find valid queue
         if (current_queue === undefined || current_queue.length === 0)
