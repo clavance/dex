@@ -65,14 +65,44 @@ class TradingPairExchange {
     return this.trade_queue;
   }
 
-   /**
-   * Remove and return first element in queue, if it exists. Otherwise return undefined.
-   */
-   popNextTrade() {
-    if (len(this.trade_queue > 0))
-      return this.trade_queue.shift();
-    return undefined;
-   }
+  /**
+  * Remove and return first element in queue, if it exists. Otherwise return undefined.
+  */
+  async popNextTrade() {
+    if (this.trade_queue.length > 0) {
+      let trade = this.trade_queue.shift();
+      // Set timestamps
+      trade.maker_order.timestamp = trade.timestamp;
+      trade.taker_order.timestamp = trade.timestamp;
+
+      // Store maker order
+      if (this.db.get(trade.maker_order.user) === undefined) {
+        await this.db.put(trade.maker_order.user, [trade.maker_order]);
+      } else {
+        let trades = this.db.get(trade.maker_order.user);
+        trades.unshift(trade.maker_order)
+        await this.db.put(trade.maker_order.user, trades)
+      }
+
+      // Store taker order
+      if (this.db.get(trade.taker_order.user) === undefined) {
+        await this.db.put(trade.taker_order.user, [trade.taker_order]);
+      } else {
+        let trades = this.db.get(trade.taker_order.user);
+        trades.unshift(trade.taker_order)
+        await this.db.put(trade.taker_order.user, trades)
+      }
+      return trade;
+  }
+  return undefined;
+  }
+
+  /**
+  * Retrieves lists of Order objects, representing trades for a particular user
+  */
+  getTradeHistoryPerUser(user) {
+    return this.db.get(user);
+  }
 
   /**
    * Add order to order book database, without performing any matching.
@@ -448,11 +478,6 @@ class TradingPairExchange {
         // Found non-empty queue, so return first element
         current_index = 1;
         return current_queue[0];
-      },
-
-      current: function() {
-        // Return current item
-        return current_queue[current_index - 1];
       }
     };
     return iterator;
