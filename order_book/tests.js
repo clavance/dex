@@ -1057,4 +1057,76 @@ ipfs.on('ready', async () => {
     console.log(num_tests_passed + " out of " + num_tests_run + " tests passed.");
   }
 
+
+  // Tests for getTradeHistoryPerUser
+
+  num_tests_failed = 0;
+  num_tests_run = 0;
+  num_tests_passed = 0;
+
+  exchange = new TradingPairExchange('test-db', ipfs, 1);
+  await exchange.init();
+
+  let ts_38 = await exchange.addOrder(new Order(true, 10, 100, "#38", undefined));
+  let ts_39 = await exchange.addOrder(new Order(false, 10, 100, "#39", undefined));
+
+  // Test that can retrieve single past trade
+  num_tests_run++;
+  try {
+    await exchange.popNextTrade();
+    let hist = exchange.getTradeHistoryPerUser("#38");
+    assert.strictEqual(hist.length, 1);
+    hist[0].timestamp = undefined;
+    assert.strictEqual(
+      JSON.stringify(new Order(true, 10, 100, "#38", undefined)),
+      JSON.stringify(hist[0]));
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: getTradeHistoryPerUser: Test 1");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  exchange.db.close();
+
+
+  exchange = new TradingPairExchange('test-db', ipfs, 1);
+  await exchange.init();
+
+  let ts_40 = await exchange.addOrder(new Order(true, 5, 100, "#40", undefined));
+  let ts_40_2 = await exchange.addOrder(new Order(true, 4, 100, "#40", undefined));
+  let ts_41 = await exchange.addOrder(new Order(false, 10, 100, "#41", undefined));
+
+  // Test that can retrieve multiple past trades, in chronological order
+  num_tests_run++;
+  try {
+    await exchange.popNextTrade();
+    await exchange.popNextTrade();
+    let hist = exchange.getTradeHistoryPerUser("#40");
+    assert.strictEqual(hist.length, 2);
+    hist[0].timestamp = undefined;
+    hist[1].timestamp = undefined;
+    assert.strictEqual(
+      JSON.stringify(new Order(true, 4, 100, "#40", undefined)),
+      JSON.stringify(hist[0]));
+    assert.strictEqual(
+      JSON.stringify(new Order(true, 5, 100, "#40", undefined)),
+      JSON.stringify(hist[1]));
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: getTradeHistoryPerUser: Test 2");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  exchange.db.close();
+
+
+  if (num_tests_passed === num_tests_run) {
+    console.log("ALL " + num_tests_run + " getTradeHistoryPerUser TESTS in Sell Order PASSED!");
+  } else {
+    console.log("NOT ALL getTradeHistoryPerUser TESTS in Sell Order PASSED!");
+    console.log(num_tests_passed + " out of " + num_tests_run + " tests passed.");
+  }
+
 })
