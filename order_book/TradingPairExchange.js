@@ -31,7 +31,8 @@ class TradingPairExchange {
     // Create OrbitDB instance
     this.orbitdb = new OrbitDB(this.ipfs);
     this.db = await this.orbitdb.keyvalue(this.name);
-    this.matched_orders_db = await this.orbitdb.keyvalue("matched_orders_db")
+    this.matched_orders_db = await this.orbitdb.keyvalue("matched_orders_db");
+    this.pending_orders_db = await this.orbitdb.keyvalue("pending_orders_db");
 
     await this.db.put("metadata", {
       best_bid: undefined,
@@ -53,7 +54,7 @@ class TradingPairExchange {
     return Math.round(num * Math.pow(10, shift_amount));
   }
 
-     /**
+  /**
    * Shift input by given no. of decimal places, making number smaller.
    * @param {int/float} num - Number to shift.
    * @param {int} shift_amount - No. of decimal places to shift by.
@@ -67,6 +68,48 @@ class TradingPairExchange {
   }
 
   /**
+  Stores given order for given user, in given (user: X) keyvalue store
+  **/
+  async storeOrderInPerUserDB(input_db, user, order) {
+    if (input_db.get(user) === undefined) {
+      await input_db.put(user, [order]);
+    } else {
+      let trades = input_db.get(user);
+      trades.unshift(order)
+      await input_db.put(user, trades)
+    }
+  }
+
+  /**
+  Removes given order for given user, from given (user: X) keyvalue store
+  **/
+  async removeOrderFromPerUserDB(input_db, user, order) {
+    if (input_db.get(user) === undefined) {
+      return;
+    }
+    let orders = input_db.get(user);
+    // Find index of order to remove
+    let i;
+    let found = false;
+    for (i = 0; i < orders.length; i++) {
+      if (orders[i].timestamp === order.timestamp &&
+          orders[i].user === order.user &&
+          orders[i].is_buy === order.is_buy) {
+        found = true;
+        break;
+      }
+    }
+    // Didn't find target order in queue
+    if (!found)
+      throw new Error("InvalidOrder");
+
+    // Remove order
+    orders.splice(i, 1);
+
+    await input_db.set(user, orders);
+  }
+
+  /**
   * Remove and return first element in queue, if it exists. Otherwise return undefined.
   */
   async popNextTrade() {
@@ -77,22 +120,10 @@ class TradingPairExchange {
       trade.taker_order.timestamp = trade.timestamp;
 
       // Store maker order
-      if (this.matched_orders_db.get(trade.maker_order.user) === undefined) {
-        await this.matched_orders_db.put(trade.maker_order.user, [trade.maker_order]);
-      } else {
-        let trades = this.matched_orders_db.get(trade.maker_order.user);
-        trades.unshift(trade.maker_order)
-        await this.matched_orders_db.put(trade.maker_order.user, trades)
-      }
+      await this.storeOrderInPerUserDB(this.matched_orders_db, trade.maker_order.user, trade.maker_order);
 
       // Store taker order
-      if (this.matched_orders_db.get(trade.taker_order.user) === undefined) {
-        await this.matched_orders_db.put(trade.taker_order.user, [trade.taker_order]);
-      } else {
-        let trades = this.matched_orders_db.get(trade.taker_order.user);
-        trades.unshift(trade.taker_order)
-        await this.matched_orders_db.put(trade.taker_order.user, trades)
-      }
+      await this.storeOrderInPerUserDB(this.matched_orders_db, trade.taker_order.user, trade.taker_order);
       return trade;
   }
   return undefined;
@@ -104,6 +135,14 @@ class TradingPairExchange {
   getTradeHistoryPerUser(user) {
     return this.matched_orders_db.get(user);
   }
+
+  /**
+  * Retrieves lists of Order objects, representing pending orders for a particular user
+  */
+  getPendingOrdersPerUser(user) {
+    return this.pending_orders_db.get(user);
+  }
+
 
   /**
    * Add order to order book database, without performing any matching.
@@ -134,6 +173,9 @@ class TradingPairExchange {
       queue.push(order);
       await this.db.set(order.price, queue);
     }
+
+    // Add order to pending orders, per user
+    await this.storeOrderInPerUserDB(this.pending_orders_db, order.user, order);
 
     // Update best/worst bid/ask
     let metadata = this.db.get("metadata");
@@ -178,6 +220,8 @@ class TradingPairExchange {
     await this.removeOrder(order);
 
     await this.updateMetadataAfterOrderRemoval(order);
+
+    await this.removeOrderFromPerUserDB(this.pending_orders_db, order.user, order);
   }
 
   /**
