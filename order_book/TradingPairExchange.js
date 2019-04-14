@@ -31,6 +31,7 @@ class TradingPairExchange {
     // Create OrbitDB instance
     this.orbitdb = new OrbitDB(this.ipfs);
     this.db = await this.orbitdb.keyvalue(this.name);
+    this.matched_orders_db = await this.orbitdb.keyvalue("matched_orders_db")
 
     await this.db.put("metadata", {
       best_bid: undefined,
@@ -76,21 +77,21 @@ class TradingPairExchange {
       trade.taker_order.timestamp = trade.timestamp;
 
       // Store maker order
-      if (this.db.get(trade.maker_order.user) === undefined) {
-        await this.db.put(trade.maker_order.user, [trade.maker_order]);
+      if (this.matched_orders_db.get(trade.maker_order.user) === undefined) {
+        await this.matched_orders_db.put(trade.maker_order.user, [trade.maker_order]);
       } else {
-        let trades = this.db.get(trade.maker_order.user);
+        let trades = this.matched_orders_db.get(trade.maker_order.user);
         trades.unshift(trade.maker_order)
-        await this.db.put(trade.maker_order.user, trades)
+        await this.matched_orders_db.put(trade.maker_order.user, trades)
       }
 
       // Store taker order
-      if (this.db.get(trade.taker_order.user) === undefined) {
-        await this.db.put(trade.taker_order.user, [trade.taker_order]);
+      if (this.matched_orders_db.get(trade.taker_order.user) === undefined) {
+        await this.matched_orders_db.put(trade.taker_order.user, [trade.taker_order]);
       } else {
-        let trades = this.db.get(trade.taker_order.user);
+        let trades = this.matched_orders_db.get(trade.taker_order.user);
         trades.unshift(trade.taker_order)
-        await this.db.put(trade.taker_order.user, trades)
+        await this.matched_orders_db.put(trade.taker_order.user, trades)
       }
       return trade;
   }
@@ -101,7 +102,7 @@ class TradingPairExchange {
   * Retrieves lists of Order objects, representing trades for a particular user
   */
   getTradeHistoryPerUser(user) {
-    return this.db.get(user);
+    return this.matched_orders_db.get(user);
   }
 
   /**
@@ -483,9 +484,7 @@ class TradingPairExchange {
     return iterator;
   }
 
-
 }
-
 
 module.exports = {
   TradingPairExchange: TradingPairExchange
