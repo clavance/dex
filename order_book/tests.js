@@ -1123,9 +1123,101 @@ ipfs.on('ready', async () => {
 
 
   if (num_tests_passed === num_tests_run) {
-    console.log("ALL " + num_tests_run + " getTradeHistoryPerUser TESTS in Sell Order PASSED!");
+    console.log("ALL " + num_tests_run + " getTradeHistoryPerUser TESTS PASSED!");
   } else {
-    console.log("NOT ALL getTradeHistoryPerUser TESTS in Sell Order PASSED!");
+    console.log("NOT ALL getTradeHistoryPerUser TESTS PASSED!");
+    console.log(num_tests_passed + " out of " + num_tests_run + " tests passed.");
+  }
+
+  // Tests for getPendingOrdersPerUser
+
+  num_tests_failed = 0;
+  num_tests_run = 0;
+  num_tests_passed = 0;
+
+  exchange = new TradingPairExchange('test-db', ipfs, 1);
+  await exchange.init();
+
+  let ts_74 = await exchange.addOrder(new Order(true, 10, 100, "#74", undefined));
+
+  // Test that can retrieve single pending order
+  num_tests_run++;
+  try {
+    let orders = exchange.getPendingOrdersPerUser("#74");
+    assert.strictEqual(orders.length, 1);
+    orders[0].timestamp = undefined;
+    assert.strictEqual(
+      JSON.stringify(new Order(true, 10, 100, "#74", undefined)),
+      JSON.stringify(orders[0]));
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: getPendingOrdersPerUser: Test 1");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  exchange.db.close();
+
+
+  exchange = new TradingPairExchange('test-db', ipfs, 1);
+  await exchange.init();
+
+  let ts_75 = await exchange.addOrder(new Order(true, 10, 100, "#75", undefined));
+  let ts_75_2 = await exchange.addOrder(new Order(true, 20, 100, "#75", undefined));
+
+  // Test that can retrieve multiple pending orders
+  num_tests_run++;
+  try {
+    let orders = exchange.getPendingOrdersPerUser("#75");
+    assert.strictEqual(orders.length, 2);
+    orders[0].timestamp = undefined;
+    orders[1].timestamp = undefined;
+    assert.strictEqual(
+      JSON.stringify(new Order(true, 10, 100, "#75", undefined)),
+      JSON.stringify(orders[1]));
+    assert.strictEqual(
+      JSON.stringify(new Order(true, 20, 100, "#75", undefined)),
+      JSON.stringify(orders[0]));
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: getPendingOrdersPerUser: Test 2");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  exchange.db.close();
+
+
+  exchange = new TradingPairExchange('test-db', ipfs, 1);
+  await exchange.init();
+
+  let ts_76 = await exchange.addOrder(new Order(true, 10, 100, "#76", undefined));
+  let ts_76_2 = await exchange.addOrder(new Order(true, 20, 100, "#76", undefined));
+
+  // Test that cancelled orders are removed from pending orders
+  num_tests_run++;
+  try {
+    await exchange.cancelOrder(new Order(true, 20, 100, "#76", ts_76_2));
+    let orders = exchange.getPendingOrdersPerUser("#76");
+    assert.strictEqual(orders.length, 1);
+    orders[0].timestamp = undefined;
+    assert.strictEqual(
+      JSON.stringify(new Order(true, 10, 100, "#76", undefined)),
+      JSON.stringify(orders[0]));
+    num_tests_passed++;
+  } catch (err) {
+    num_tests_failed++;
+    console.log("FAILED: getPendingOrdersPerUser: Test 3");
+    console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  }
+
+  exchange.db.close();
+
+
+  if (num_tests_passed === num_tests_run) {
+    console.log("ALL " + num_tests_run + " getPendingOrdersPerUser TESTS PASSED!");
+  } else {
+    console.log("NOT ALL getPendingOrdersPerUser TESTS PASSED!");
     console.log(num_tests_passed + " out of " + num_tests_run + " tests passed.");
   }
 
