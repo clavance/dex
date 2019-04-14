@@ -1067,18 +1067,18 @@ ipfs.on('ready', async () => {
   exchange = new TradingPairExchange('test-db', ipfs, 1);
   await exchange.init();
 
-  let ts_38 = await exchange.addOrder(new Order(true, 10, 100, "#38", undefined));
-  let ts_39 = await exchange.addOrder(new Order(false, 10, 100, "#39", undefined));
+  let ts_70 = await exchange.addOrder(new Order(true, 10, 100, "#70", undefined));
+  let ts_71 = await exchange.addOrder(new Order(false, 10, 100, "#71", undefined));
 
   // Test that can retrieve single past trade
   num_tests_run++;
   try {
     await exchange.popNextTrade();
-    let hist = exchange.getTradeHistoryPerUser("#38");
+    let hist = exchange.getTradeHistoryPerUser("#70");
     assert.strictEqual(hist.length, 1);
     hist[0].timestamp = undefined;
     assert.strictEqual(
-      JSON.stringify(new Order(true, 10, 100, "#38", undefined)),
+      JSON.stringify(new Order(true, 10, 100, "#70", undefined)),
       JSON.stringify(hist[0]));
     num_tests_passed++;
   } catch (err) {
@@ -1093,24 +1093,24 @@ ipfs.on('ready', async () => {
   exchange = new TradingPairExchange('test-db', ipfs, 1);
   await exchange.init();
 
-  let ts_40 = await exchange.addOrder(new Order(true, 5, 100, "#40", undefined));
-  let ts_40_2 = await exchange.addOrder(new Order(true, 4, 100, "#40", undefined));
-  let ts_41 = await exchange.addOrder(new Order(false, 10, 100, "#41", undefined));
+  let ts_72 = await exchange.addOrder(new Order(true, 5, 100, "#72", undefined));
+  let ts_72_2 = await exchange.addOrder(new Order(true, 4, 100, "#72", undefined));
+  let ts_73 = await exchange.addOrder(new Order(false, 10, 100, "#73", undefined));
 
   // Test that can retrieve multiple past trades, in chronological order
   num_tests_run++;
   try {
     await exchange.popNextTrade();
     await exchange.popNextTrade();
-    let hist = exchange.getTradeHistoryPerUser("#40");
+    let hist = exchange.getTradeHistoryPerUser("#72");
     assert.strictEqual(hist.length, 2);
     hist[0].timestamp = undefined;
     hist[1].timestamp = undefined;
     assert.strictEqual(
-      JSON.stringify(new Order(true, 4, 100, "#40", undefined)),
+      JSON.stringify(new Order(true, 4, 100, "#72", undefined)),
       JSON.stringify(hist[0]));
     assert.strictEqual(
-      JSON.stringify(new Order(true, 5, 100, "#40", undefined)),
+      JSON.stringify(new Order(true, 5, 100, "#72", undefined)),
       JSON.stringify(hist[1]));
     num_tests_passed++;
   } catch (err) {
