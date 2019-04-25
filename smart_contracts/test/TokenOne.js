@@ -1,25 +1,25 @@
-var DexToken = artifacts.require("./DexToken.sol");
+var TokenOne = artifacts.require("./TokenOne.sol");
 
-contract('DexToken', function(accounts) {
+contract('TokenOne', function(accounts) {
 	var tokenInstance;
 
 	it('initialises contract with correct values', function() {
-		return DexToken.deployed().then(function(instance) {
+		return TokenOne.deployed().then(function(instance) {
 			tokenInstance = instance;
 			return tokenInstance.name();
 		}).then(function(name) {
-			assert.equal(name, 'Dex Token', 'token initialised with correct name');
+			assert.equal(name, 'Orbit Token', 'token initialised with correct name');
 			return tokenInstance.symbol();
 		}).then(function(symbol) {
-			assert.equal(symbol, 'DEX', 'token initialised with correct symbol');
+			assert.equal(symbol, 'ORB', 'token initialised with correct symbol');
 			return tokenInstance.version();
 		}).then(function(version) {
-			assert.equal(version, 'DEX v1.0', 'token version correct');
+			assert.equal(version, 'ORB v1.0', 'token version correct');
 		});
 	});
 
 	it('allocates initial supply on deployment', function() {
-		return DexToken.deployed().then(function(instance) {
+		return TokenOne.deployed().then(function(instance) {
 			tokenInstance = instance;
 			return tokenInstance.totalSupply();
 		}).then(function(totalSupply) {
@@ -31,7 +31,7 @@ contract('DexToken', function(accounts) {
 	});
 
 	it('transfers tokens from sender to receiver, updates balances and triggers Transfer event', function() {
-		return DexToken.deployed().then(function(instance) {
+		return TokenOne.deployed().then(function(instance) {
 			tokenInstance = instance;
 			//test 'require' statement
 			//should throw error if sum transferred is larger than sender's balance
@@ -44,7 +44,7 @@ contract('DexToken', function(accounts) {
 			return tokenInstance.transfer.call(accounts[1], 100000, { from: accounts[0]} );
 		}).then(function(success) {
 			assert.equal(success, true, 'returns true');
-			//transfer 100,000 DEX from sender to recipient
+			//transfer 100,000 ORB from sender to recipient
 			return tokenInstance.transfer(accounts[1], 100000, { from: accounts[0] });
 		}).then(function(receipt) {
 			assert.equal(receipt.logs.length, 1, 'triggers one event');
@@ -62,7 +62,7 @@ contract('DexToken', function(accounts) {
 	});
 
 	it('allows approval of third party for token transfers', function() {
-		return DexToken.deployed().then(function(instance) {
+		return TokenOne.deployed().then(function(instance) {
 			tokenInstance = instance;
 			//test 'approve' function with call
 			return tokenInstance.approve.call(accounts[1], 100);
@@ -84,7 +84,7 @@ contract('DexToken', function(accounts) {
 
 	it('transfers tokens from sender to receiver via approved third party'+
 		' updates balances and allowances, and triggers Transfer event', function() {
-			return DexToken.deployed().then(function(instance) {
+			return TokenOne.deployed().then(function(instance) {
 				tokenInstance = instance;
 				//sending account
 				fromAccount = accounts[2];
