@@ -84,7 +84,7 @@ contract Exchange {
 
   function trade(uint256[6] memory tradeValues, address[4] memory tradeAddresses, uint8[2] memory v, bytes32[2] memory r, bytes32[2] memory s) public returns (bool success) { //should this be public?
     
-    //assert(block.number <= tradeValues[2]); //checks that this is the latest block?...
+    //assert(block.number <= tradeValues[2]); //checks that this is the latest block
 
     //an order is encoded containing the following information
     bytes32 orderHash = 
@@ -127,7 +127,7 @@ contract Exchange {
     //set to true now that the trade has been made to indicate that the nonce has been used
     traded[tradeHash] = true;
 
-    //***** I AM NOT SURE IF THIS PART IS NECESSARY OR IF IT WILL BE DONE BY THE ORDER BOOK? *****//
+    //*******************************************************************************************//
     uint256 amount = tradeValues[4];
     //divide the amount of the order being bought by the taker, by the amount being bought by the maker
     //so if the amount being bought by both parties is exactly the same, then tradeValues[4]/tradeValues[0] = 1
