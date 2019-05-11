@@ -4,17 +4,28 @@ const OrbitDB = require('orbit-db');
 let Trade = require('./Trade').Trade;
 let Order = require('./Order').Order;
 
+/**
+ * The TradingPairExchange class represents the order book that backs a pair of
+ * currencies being traded against each other. It stores the resting orders in
+ * an OrbitDB key-value store database, where the keys are prices and the values
+ * are arrays of Order objects, representing the queue of Order objects at each
+ * price level in the book.
+ *
+ * One would instantiate a new instance of this class for each pair of currencies
+ * to be traded against each other.
+ */
 class TradingPairExchange {
 
   /**
    * Initialise object with orbit db instance, and populated metadata fields.
-   * @param {string} name - Name of key-value store in database.
-   * @param {IPFS} ipfs - IPFS instance to use.
-   * @param {int/float} tick_size (optional) - Minimum distance between price levels.
+   *
+   * @param {String} name - Name of key-value store in database
+   * @param {IPFS} ipfs - IPFS instance to use
+   * @param {Number} tick_size (optional) - Minimum distance between price levels
    * @param {uint} price_shift (optional) - No. of decimal places to shift prices by,
      so they can be stored internally as integers. E.g. 10.43, price_shift=2, => 1043
    * @param {uint} amount_shift (optional) - No. of decimal places to shift amounts by,
-     so they can be stored internally as integers.
+     so they can be stored internally as integers
    */
   constructor(name, ipfs, tick_size, price_shift, amount_shift) {
     // Populate default parameters
@@ -27,6 +38,13 @@ class TradingPairExchange {
     this.trade_queue = [];
   }
 
+  /**
+   * Perform further initialisation steps, that can't be performed in
+   * constructor because of need to use async functions.
+   *
+   * Creates necessary orbit db instances (key-value stores), and initial
+   * metadata setup.
+   */
   async init() {
     // Create OrbitDB instance
     this.orbitdb = new OrbitDB(this.ipfs);
@@ -47,8 +65,10 @@ class TradingPairExchange {
 
   /**
    * Shift input by given no. of decimal places, making number bigger.
-   * @param {int/float} num - Number to shift.
-   * @param {int} shift_amount - No. of decimal places to shift by.
+   *
+   * @param {Number} num - Number to shift.
+   * @param {Integer} shift_amount - No. of decimal places to shift by.
+   * @return {Integer} shifted input number
    */
   static shiftToInt(num, shift_amount) {
     return Math.round(num * Math.pow(10, shift_amount));
@@ -56,15 +76,13 @@ class TradingPairExchange {
 
   /**
    * Shift input by given no. of decimal places, making number smaller.
-   * @param {int/float} num - Number to shift.
-   * @param {int} shift_amount - No. of decimal places to shift by.
+   *
+   * @param {Number} num - Number to shift.
+   * @param {Integer} shift_amount - No. of decimal places to shift by.
+   * @return {Number} shifted input number
    */
   static shiftToFloat(num, shift_amount) {
     return num / Math.pow(10, shift_amount);
-  }
-
-  getTradeQueue() {
-    return this.trade_queue;
   }
 
   /**

@@ -486,7 +486,7 @@ ipfs.on('ready', async () => {
     order = new Order(true, 20, 90, "#5", undefined);
     let ts_5 = await exchange.addOrder(order);
     console.log
-    assert.strictEqual(exchange.getTradeQueue().length, [].length);
+    assert.strictEqual(exchange.trade_queue.length, [].length);
     assert.strictEqual(JSON.stringify(exchange.db.get(90)[0]), JSON.stringify(new Order(true, 20, 90, "#5", ts_5)));
     num_tests_passed++;
   } catch (err) {
@@ -505,7 +505,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(true, 20, 90, "#6", undefined);
     let ts_6 = await exchange.addOrder(order);
-    assert.strictEqual(exchange.getTradeQueue().length, [].length);
+    assert.strictEqual(exchange.trade_queue.length, [].length);
     assert.strictEqual(JSON.stringify(exchange.db.get(90)[0]), JSON.stringify(new Order(true, 20, 90, "#6", ts_6)));
     num_tests_passed++;
   } catch (err) {
@@ -528,7 +528,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(true, 10, 50, "#9", undefined);
     let ts_9 = await exchange.addOrder(order);
-    let trade_queue = exchange.getTradeQueue();
+    let trade_queue = exchange.trade_queue;
     assert.strictEqual(JSON.stringify(trade_queue[0].maker_order), JSON.stringify(new Order(false, 10, 50, "#7", ts_7)));
     assert.strictEqual(JSON.stringify(trade_queue[0].taker_order), JSON.stringify(new Order(true, 10, 50, "#9", ts_9)));
     assert.strictEqual(exchange.db.get(50).length, 0);
@@ -554,7 +554,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(true, 9, 50, "#12", undefined);
     let ts_12 = await exchange.addOrder(order);
-    let trade_queue = exchange.getTradeQueue();
+    let trade_queue = exchange.trade_queue;
     assert.strictEqual(JSON.stringify(trade_queue[0].maker_order), JSON.stringify(new Order(false, 9, 50, "#10", ts_10)));
     assert.strictEqual(JSON.stringify(trade_queue[0].taker_order), JSON.stringify(new Order(true, 9, 50, "#12", ts_12)));
 
@@ -583,7 +583,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(true, 20, 100, "#16", undefined);
     let ts_16 = await exchange.addOrder(order);
-    let trade_queue = exchange.getTradeQueue();
+    let trade_queue = exchange.trade_queue;
     assert.strictEqual(JSON.stringify(trade_queue[0].maker_order), JSON.stringify(new Order(false, 10, 100, "#13", ts_13)));
     assert.strictEqual(JSON.stringify(trade_queue[0].taker_order), JSON.stringify(new Order(true, 10, 100, "#16", ts_16)));
     assert.strictEqual(JSON.stringify(trade_queue[1].maker_order), JSON.stringify(new Order(false, 10, 100, "#14", ts_14)));
@@ -616,7 +616,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(true, 35, 100, "#21", undefined);
     let ts_21 = await exchange.addOrder(order);
-    let trade_queue = exchange.getTradeQueue();
+    let trade_queue = exchange.trade_queue;
     assert.strictEqual(JSON.stringify(trade_queue[0].maker_order), JSON.stringify(new Order(false, 10, 100, "#17", ts_17)));
     assert.strictEqual(JSON.stringify(trade_queue[0].taker_order), JSON.stringify(new Order(true, 10, 100, "#21", ts_21)));
     assert.strictEqual(JSON.stringify(trade_queue[1].maker_order), JSON.stringify(new Order(false, 10, 100, "#18", ts_18)));
@@ -648,7 +648,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(true, 30, 120, "#24", undefined);
     let ts_24 = await exchange.addOrder(order);
-    let trade_queue = exchange.getTradeQueue();
+    let trade_queue = exchange.trade_queue;
     assert.strictEqual(JSON.stringify(trade_queue[0].maker_order), JSON.stringify(new Order(false, 10, 100, "#21", ts_21)));
     assert.strictEqual(JSON.stringify(trade_queue[0].taker_order), JSON.stringify(new Order(true, 10, 100, "#24", ts_24)));
     assert.strictEqual(JSON.stringify(trade_queue[1].maker_order), JSON.stringify(new Order(false, 10, 110, "#22", ts_22)));
@@ -680,7 +680,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(true, 40, 120, "#28", undefined);
     let ts_28 = await exchange.addOrder(order);
-    let trade_queue = exchange.getTradeQueue();
+    let trade_queue = exchange.trade_queue;
     assert.strictEqual(JSON.stringify(trade_queue[0].maker_order), JSON.stringify(new Order(false, 10, 100, "#25", ts_25)));
     assert.strictEqual(JSON.stringify(trade_queue[0].taker_order), JSON.stringify(new Order(true, 10, 100, "#28", ts_28)));
     assert.strictEqual(JSON.stringify(trade_queue[1].maker_order), JSON.stringify(new Order(false, 10, 110, "#26", ts_26)));
@@ -713,7 +713,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(true, 50, 120, "#32", undefined);
     let ts_32 = await exchange.addOrder(order);
-    let trade_queue = exchange.getTradeQueue();
+    let trade_queue = exchange.trade_queue;
     assert.strictEqual(JSON.stringify(trade_queue[0].maker_order), JSON.stringify(new Order(false, 10, 100, "#29", ts_29)));
     assert.strictEqual(JSON.stringify(trade_queue[0].taker_order), JSON.stringify(new Order(true, 10, 100, "#32", ts_32)));
     assert.strictEqual(JSON.stringify(trade_queue[1].maker_order), JSON.stringify(new Order(false, 10, 110, "#30", ts_30)));
@@ -779,7 +779,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(false, 10, 120, "#38", undefined);
     let ts_38 = await exchange.addOrder(order);
-    assert.strictEqual(exchange.getTradeQueue().length, [].length);
+    assert.strictEqual(exchange.trade_queue.length, [].length);
     assert.strictEqual(JSON.stringify(exchange.db.get(120)[0]), JSON.stringify(new Order(false, 10, 120, "#38", ts_38)));
     num_tests_passed++;
   } catch (err) {
@@ -799,7 +799,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(false, 20, 90, "#39", undefined);
     let ts_39 = await exchange.addOrder(order);
-    assert.strictEqual(exchange.getTradeQueue().length, [].length);
+    assert.strictEqual(exchange.trade_queue.length, [].length);
     assert.strictEqual(JSON.stringify(exchange.db.get(90)[0]), JSON.stringify(new Order(false, 20, 90, "#39", ts_39)))
     num_tests_passed++;
   } catch (err) {
@@ -822,7 +822,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(false, 10, 100, "#42", undefined);
     let ts_42 = await exchange.addOrder(order);
-    let trade_queue = exchange.getTradeQueue();
+    let trade_queue = exchange.trade_queue;
     assert.strictEqual(JSON.stringify(trade_queue[0].taker_order), JSON.stringify(new Order(false, 10, 100, "#42", ts_42)));
     assert.strictEqual(JSON.stringify(trade_queue[0].maker_order), JSON.stringify(new Order(true, 10, 100, "#41", ts_41)));
     assert.strictEqual(JSON.stringify(exchange.db.get(50)[0]), JSON.stringify(new Order(true, 10, 50, "#40",ts_40)));
@@ -848,7 +848,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(false, 5, 100, "#45", undefined);
     let ts_45 = await exchange.addOrder(order);
-    let trade_queue = exchange.getTradeQueue();
+    let trade_queue = exchange.trade_queue;
     assert.strictEqual(JSON.stringify(trade_queue[0].taker_order), JSON.stringify(new Order(false, 5, 100, "#45", ts_45)));
     assert.strictEqual(JSON.stringify(trade_queue[0].maker_order), JSON.stringify(new Order(true, 5, 100, "#44", ts_44)));
 
@@ -877,7 +877,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(false, 20, 120, "#49", undefined);
     let ts_49 = await exchange.addOrder(order);
-    let trade_queue = exchange.getTradeQueue();
+    let trade_queue = exchange.trade_queue;
     assert.strictEqual(JSON.stringify(trade_queue[0].taker_order), JSON.stringify(new Order(false, 15, 120, "#49", ts_49)));
     assert.strictEqual(JSON.stringify(trade_queue[0].maker_order), JSON.stringify(new Order(true, 15, 120, "#47", ts_47)));
     assert.strictEqual(JSON.stringify(trade_queue[1].taker_order), JSON.stringify(new Order(false, 5, 120, "#49", ts_49)));
@@ -908,7 +908,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(false, 35, 120, "#54", undefined);
     let ts_54 = await exchange.addOrder(order);
-    let trade_queue = exchange.getTradeQueue();
+    let trade_queue = exchange.trade_queue;
     assert.strictEqual(JSON.stringify(trade_queue[0].taker_order), JSON.stringify(new Order(false, 15, 120, "#54", ts_54)));
     assert.strictEqual(JSON.stringify(trade_queue[0].maker_order), JSON.stringify(new Order(true, 15, 120, "#51", ts_51)));
 
@@ -943,7 +943,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(false, 35, 100, "#58", undefined);
     let ts_58 = await exchange.addOrder(order);
-    let trade_queue = exchange.getTradeQueue();
+    let trade_queue = exchange.trade_queue;
     assert.strictEqual(JSON.stringify(trade_queue[0].taker_order), JSON.stringify(new Order(false, 20, 120, "#58", ts_58)));
     assert.strictEqual(JSON.stringify(trade_queue[0].maker_order), JSON.stringify(new Order(true, 20, 120, "#57", ts_57)));
     assert.strictEqual(JSON.stringify(trade_queue[1].taker_order), JSON.stringify(new Order(false, 10, 110, "#58", ts_58)));
@@ -976,7 +976,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(false, 40, 100, "#62", undefined);
     let ts_62 = await exchange.addOrder(order);
-    let trade_queue = exchange.getTradeQueue();
+    let trade_queue = exchange.trade_queue;
     assert.strictEqual(JSON.stringify(trade_queue[0].taker_order), JSON.stringify(new Order(false, 20, 120, "#62", ts_62)));
     assert.strictEqual(JSON.stringify(trade_queue[0].maker_order), JSON.stringify(new Order(true, 20, 120, "#61", ts_61)));
     assert.strictEqual(JSON.stringify(trade_queue[1].taker_order), JSON.stringify(new Order(false, 10, 110, "#62", ts_62)));
@@ -1009,7 +1009,7 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(false, 50, 100, "#66", undefined);
     let ts_66 = await exchange.addOrder(order);
-    let trade_queue = exchange.getTradeQueue();
+    let trade_queue = exchange.trade_queue;
     assert.strictEqual(JSON.stringify(trade_queue[0].taker_order), JSON.stringify(new Order(false, 20, 120, "#66", ts_66)));
     assert.strictEqual(JSON.stringify(trade_queue[0].maker_order), JSON.stringify(new Order(true, 20, 120, "#65", ts_65)));
     assert.strictEqual(JSON.stringify(trade_queue[1].taker_order), JSON.stringify(new Order(false, 10, 110, "#66", ts_66)));
