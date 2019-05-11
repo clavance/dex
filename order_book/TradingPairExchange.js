@@ -64,6 +64,7 @@ class TradingPairExchange {
   }
 
   /**
+   * Private internal helper function
    * Shift input by given no. of decimal places, making number bigger.
    *
    * @param {Number} num - Number to shift.
@@ -75,6 +76,7 @@ class TradingPairExchange {
   }
 
   /**
+   * * Private internal helper function
    * Shift input by given no. of decimal places, making number smaller.
    *
    * @param {Number} num - Number to shift.
@@ -86,8 +88,11 @@ class TradingPairExchange {
   }
 
   /**
-  Stores given order for given user, in given (user: X) keyvalue store
-  **/
+   * Private internal helper function
+   * Stores given order for given user, in given (user: X) key-value store
+   *
+   * @param {orbitdb.keyvalue} input_db - key-value store to insert order into
+   **/
   async storeOrderInPerUserDB(input_db, user, order) {
     if (input_db.get(user) === undefined) {
       await input_db.put(user, [order]);
@@ -99,8 +104,11 @@ class TradingPairExchange {
   }
 
   /**
-  Removes given order for given user, from given (user: X) keyvalue store
-  **/
+   * Private internal helper function
+   * Removes given order for given user, from given (user: X) key-value store
+   *
+   * @param {orbitdb.keyvalue} input_db - key-value store to remove order from
+   **/
   async removeOrderFromPerUserDB(input_db, user, order) {
     if (input_db.get(user) === undefined) {
       return;
@@ -128,8 +136,12 @@ class TradingPairExchange {
   }
 
   /**
-  * Remove and return first element in queue, if it exists. Otherwise return undefined.
-  */
+   * Remove and return first Trade in trade queue, if it exists. Otherwise return undefined.
+   * Also extract and store maker and taker Order objects from Trade object in
+   * matched_orders_db.
+   *
+   * @return {Trade} Trade object at front of trade_queue
+   */
   async popNextTrade() {
     if (this.trade_queue.length > 0) {
       let trade = this.trade_queue.shift();
@@ -148,7 +160,11 @@ class TradingPairExchange {
   }
 
   /**
-  * Retrieves lists of Order objects, representing trades for a particular user
+  * Retrieves list of Order objects, representing the user's Order in Trades
+  * that they have been involved in, that have been executed on the blockchain.
+  *
+  * @param {String} user - unique id representing a user
+  * @return {Order[]} list of Order objects, for given user
   */
   getTradeHistoryPerUser(user) {
     return this.matched_orders_db.get(user);
@@ -156,6 +172,9 @@ class TradingPairExchange {
 
   /**
   * Retrieves lists of Order objects, representing pending orders for a particular user
+  *
+  * @param {String} user - unique id representing a user
+  * @return {Order[]} list of Order objects, for given user
   */
   getPendingOrdersPerUser(user) {
     return this.pending_orders_db.get(user);
@@ -163,9 +182,12 @@ class TradingPairExchange {
 
 
   /**
-   * Add order to order book database, without performing any matching.
-   * @param {keyValueStore} db - OrbitDB key value database holding order book.
-   * @param {Order} order - Contains details of order to add.
+   * Add order to order book database, matching passed Order with orders resting
+   * on the order book, if possible. Can also match only part of the passed
+   * Order, depending on state of order book.
+   *
+   * @param {Order} order - order to add/match
+   * @return {Number} timestamp of order, in milliseconds since 1 Jan 1970 00:00:00
    */
   async addOrder(order) {
 
@@ -227,6 +249,14 @@ class TradingPairExchange {
    * @param {int} custom_shift_amount - Set if want to use non-standard shift
      amount, e.g. 0 if no shifting necessary.
    */
+
+  /**
+   * Cancel order in order book database. Remove Order object from OrbitDB. Also
+   * updates metadata and pending orders.
+   *
+   * @param {Order} order - order to cancel
+   * @param {Integer} custom_shift_amount - Set if want to use non-standard shift
+   */
   async cancelOrder(order, custom_shift_amount) {
 
     // Shift order values so represented as int internally
@@ -243,8 +273,10 @@ class TradingPairExchange {
   }
 
   /**
-   * Remove order in order book database
-   * @param {Order} order - Contains details of order to remove.
+   * Private internal helper function
+   * Remove Order object from order book database
+   *
+   * @param {Order} order - order to remove
    */
   async removeOrder(order) {
 
@@ -276,8 +308,10 @@ class TradingPairExchange {
   }
 
   /**
-   * Update metadata fields after removing order from order book database
-   * @param {Order} order - Contains details of order to remove.
+   * Private internal helper function
+   * Update metadata fields after removing given Order from order book database
+   *
+   * @param {Order} order - removed order
    */
   async updateMetadataAfterOrderRemoval(order) {
 
@@ -330,10 +364,12 @@ class TradingPairExchange {
   }
 
   /**
-   * Remove part of the amount from an order in order book database
-   * @param {Order} order - Contains details of order to modify.
-   * @param {int} amount - Amount to deplete order by.
-   * @param {int} custom_shift_amount - Set if want to use non-standard shift
+   * Private internal helper function
+   * Remove part of the amount from an Order in order book database
+   *
+   * @param {Order} order - order to modify
+   * @param {Number} amount - Amount to deplete order by
+   * @param {Integer} custom_shift_amount - Set if want to use non-standard shift
      amount, e.g. 0 if no shifting necessary.
    */
   async depleteOrder(order, amount, custom_shift_amount) {
@@ -379,9 +415,11 @@ class TradingPairExchange {
   }
 
   /**
+   * Private internal helper function
    * Match given order with orders already on order book. Modify existing order
-     book as matches are made, as well as appending to trade queue, for orders
-     yet to be executed on blockchain.
+   * book as matches are made, as well as appending resulting Trade objects to
+   * trade queue
+   *
    * @param {Order} taker_order - Incoming taker order.
    */
   async matchOrder(taker_order) {
@@ -440,10 +478,13 @@ class TradingPairExchange {
   }
 
   /**
+   * Private internal helper function
    * Check if price is valid such that maker and taker orders can match against
-     each other.
+   * each other.
+   *
    * @param {Order} taker_order - Incoming taker order.
    * @param {Order} maker_order - Incoming maker order.
+   * @return {Boolean} true if price is valid, false if not
    */
   priceValid(taker_order, maker_order) {
     if (taker_order.is_buy && maker_order.price <= taker_order.price)
@@ -454,9 +495,12 @@ class TradingPairExchange {
   }
 
   /**
+   * Private internal helper function
    * Create shallow copy of object, assuming no functions are called within
-     object
-   * @param {Object} obj - Object to copy.
+   * object
+   *
+   * @param {Object} obj - Object to copy
+   * @return {Object} copied object
    */
   shallowCopy(obj) {
     return JSON.parse(JSON.stringify(obj));
@@ -464,8 +508,11 @@ class TradingPairExchange {
  
 
   /**
-   * Check if any matching order exist, using best bid/ask
-   * @param {Order} taker_order - Incoming taker order.
+   * Private internal helper function
+   * Quick check if any matching orders exist, using best bid/ask
+   *
+   * @param {Order} taker_order - Incoming taker order
+   * @return {Boolean} true if at least one matching order exists, false otherwise
    */
   matchingOrdersExist(taker_order) {
     let metadata = this.db.get("metadata");
@@ -486,10 +533,14 @@ class TradingPairExchange {
   }
 
   /**
+   * Private internal helper function
    * Get parameters for iterating through either bids or asks, from best to
-     worst.
-   * @param {bool} get_bids - True if want to iterate through bids, false for
+   * worst.
+   *
+   * @param {Boolean} get_bids - true if want to iterate through bids, false for
      asks
+   * @return {Number[]} array of price to start iterating from, price to finish
+   * iterating at, and increment to use when iterating
    */
   getIterationParams(get_bids) {
     let metadata = this.db.get("metadata");
@@ -507,6 +558,28 @@ class TradingPairExchange {
     return [start_price, end_price, increment];
   }
 
+  /**
+   * Private internal helper function
+   * Iterator for iterating through Orders objects on order book, from start
+   * price to end price using given increment, iterating through Order objects
+   * in each trade queue at each price level within given range.
+   *
+   * @param {Integer} start_price - price level to start iterating from
+   * @param {Integer} end_price - price level to finish iterating at
+   * @param {Integer} increment - increment to use when iterating. Can be used
+   * to specify iteration direction.
+   * @return {Object} object containing next() function, which is called to get
+   * next Order object in iteration sequence.
+   *
+   * @example
+   *
+   *   let iter = this.bookIterator(100, 200, 1);
+   *   let order = iter.next();
+   *   while (!order.done) {
+   *     // do something with order
+   *     order = iter.next();
+   *   }
+   */
   bookIterator(start_price, end_price, increment) {
     let current_price = start_price;
     let db = this.db
