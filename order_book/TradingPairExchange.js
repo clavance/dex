@@ -64,7 +64,7 @@ class TradingPairExchange {
   }
 
   /**
-   * Private internal helper function
+   * Private internal helper function.
    * Shift input by given no. of decimal places, making number bigger.
    *
    * @param {Number} num - Number to shift.
@@ -76,7 +76,7 @@ class TradingPairExchange {
   }
 
   /**
-   * * Private internal helper function
+   * Private internal helper function.
    * Shift input by given no. of decimal places, making number smaller.
    *
    * @param {Number} num - Number to shift.
@@ -88,10 +88,12 @@ class TradingPairExchange {
   }
 
   /**
-   * Private internal helper function
+   * Private internal helper function.
    * Stores given order for given user, in given (user: X) key-value store
    *
    * @param {orbitdb.keyvalue} input_db - key-value store to insert order into
+   * @param {String} user - user id, used as key in input_db
+   * @param {Order} order - order to store
    **/
   async storeOrderInPerUserDB(input_db, user, order) {
     if (input_db.get(user) === undefined) {
@@ -104,10 +106,12 @@ class TradingPairExchange {
   }
 
   /**
-   * Private internal helper function
+   * Private internal helper function.
    * Removes given order for given user, from given (user: X) key-value store
    *
    * @param {orbitdb.keyvalue} input_db - key-value store to remove order from
+   * @param {String} user - user id, used as key in input_db
+   * @param {Order} order - order to remove
    **/
   async removeOrderFromPerUserDB(input_db, user, order) {
     if (input_db.get(user) === undefined) {
@@ -273,7 +277,7 @@ class TradingPairExchange {
   }
 
   /**
-   * Private internal helper function
+   * Private internal helper function.
    * Remove Order object from order book database
    *
    * @param {Order} order - order to remove
@@ -308,7 +312,7 @@ class TradingPairExchange {
   }
 
   /**
-   * Private internal helper function
+   * Private internal helper function.
    * Update metadata fields after removing given Order from order book database
    *
    * @param {Order} order - removed order
@@ -364,7 +368,7 @@ class TradingPairExchange {
   }
 
   /**
-   * Private internal helper function
+   * Private internal helper function.
    * Remove part of the amount from an Order in order book database
    *
    * @param {Order} order - order to modify
@@ -415,7 +419,7 @@ class TradingPairExchange {
   }
 
   /**
-   * Private internal helper function
+   * Private internal helper function.
    * Match given order with orders already on order book. Modify existing order
    * book as matches are made, as well as appending resulting Trade objects to
    * trade queue
@@ -478,7 +482,7 @@ class TradingPairExchange {
   }
 
   /**
-   * Private internal helper function
+   * Private internal helper function.
    * Check if price is valid such that maker and taker orders can match against
    * each other.
    *
@@ -495,7 +499,7 @@ class TradingPairExchange {
   }
 
   /**
-   * Private internal helper function
+   * Private internal helper function.
    * Create shallow copy of object, assuming no functions are called within
    * object
    *
@@ -508,7 +512,7 @@ class TradingPairExchange {
  
 
   /**
-   * Private internal helper function
+   * Private internal helper function.
    * Quick check if any matching orders exist, using best bid/ask
    *
    * @param {Order} taker_order - Incoming taker order
@@ -533,7 +537,7 @@ class TradingPairExchange {
   }
 
   /**
-   * Private internal helper function
+   * Private internal helper function.
    * Get parameters for iterating through either bids or asks, from best to
    * worst.
    *
@@ -559,7 +563,7 @@ class TradingPairExchange {
   }
 
   /**
-   * Private internal helper function
+   * Private internal helper function.
    * Iterator for iterating through Orders objects on order book, from start
    * price to end price using given increment, iterating through Order objects
    * in each trade queue at each price level within given range.
