@@ -373,16 +373,8 @@ class TradingPairExchange {
    *
    * @param {Order} order - order to modify
    * @param {Number} amount - Amount to deplete order by
-   * @param {Integer} custom_shift_amount - Set if want to use non-standard shift
-     amount, e.g. 0 if no shifting necessary.
    */
-  async depleteOrder(order, amount, custom_shift_amount) {
-    // Shift order values so represented as int internally
-    order.price = TradingPairExchange.shiftToInt(
-      order.price, custom_shift_amount || this.price_shift);
-    order.amount = TradingPairExchange.shiftToInt(
-      order.amount, custom_shift_amount || this.amount_shift);
-
+  async depleteOrder(order, amount) {
     let queue = this.db.get(order.price);
 
     if (queue === undefined || queue.length === 0)
