@@ -87,6 +87,46 @@ class TradingPairExchange {
     return num / Math.pow(10, shift_amount);
   }
 
+  /**
+   * Private internal helper function.
+   * Shift order by given no. of decimal places, for price and amount making
+   * number larger, so it is represented as an integer internally.
+   *
+   * @param {Order} order - Order to shift
+   * @param {Integer} price_shift - No. of decimal places to shift price by.
+   * @param {Integer} amount_shift - No. of decimal places to amount price by.
+   * @return {Number} shifted input number
+   */
+  static shiftOrder(order, price_shift, amount_shift) {
+    let internal_order = order;//TradingPairExchange.shallowCopy(order);
+    // Shift order values so represented as int internally
+    internal_order.price = TradingPairExchange.shiftToInt(
+      internal_order.price, price_shift);
+    internal_order.amount = TradingPairExchange.shiftToInt(
+      internal_order.amount, amount_shift);
+    return internal_order;
+  }
+
+  /**
+   * Private internal helper function.
+   * Shift order by given no. of decimal places, for price and amount making
+   * number smaller, so it is represented as a float. FOr returning float value
+   * back to user.
+   *
+   * @param {Order} order - Order to shift
+   * @param {Integer} price_shift - No. of decimal places to shift price by.
+   * @param {Integer} amount_shift - No. of decimal places to amount price by.
+   * @return {Number} shifted input number
+   */
+  static unshiftOrder(order, price_shift, amount_shift) {
+    let internal_order = order;//TradingPairExchange.shallowCopy(order);
+    // Shift order values so represented as int internally
+    internal_order.price = TradingPairExchange.shiftToFloat(
+      internal_order.price, price_shift);
+    internal_order.amount = TradingPairExchange.shiftToFloat(
+      internal_order.amount, amount_shift);
+    return internal_order;
+  }
 
 
   /**
@@ -201,8 +241,7 @@ class TradingPairExchange {
     order.timestamp = new Date().getTime();
 
     // Shift order values so represented as int internally
-    order.price = TradingPairExchange.shiftToInt(order.price, this.price_shift);
-    order.amount = TradingPairExchange.shiftToInt(order.amount, this.amount_shift);
+    order = TradingPairExchange.shiftOrder(order, this.price_shift, this.amount_shift);
 
     // Perform order matching
     await this.matchOrder(order);
@@ -258,10 +297,7 @@ class TradingPairExchange {
   async cancelOrder(order) {
 
     // Shift order values so represented as int internally
-    order.price = TradingPairExchange.shiftToInt(
-      order.price,this.price_shift);
-    order.amount = TradingPairExchange.shiftToInt(
-      order.amount, this.amount_shift);
+    order = TradingPairExchange.shiftOrder(order, this.price_shift, this.amount_shift);
 
     await this.removeOrder(order);
 
@@ -424,26 +460,26 @@ class TradingPairExchange {
     // Iterate through potential matching orders
     let iter = this.bookIterator(
       iter_params[0], iter_params[1], iter_params[2]);
-    let maker_order = this.shallowCopy(iter.next());
+    let maker_order = TradingPairExchange.shallowCopy(iter.next());
     let trade, trade_taker_order, trade_maker_order;
     while (!maker_order.done && taker_order.amount > 0) {
 
       if (this.priceValid(taker_order, maker_order)) {
 
         // Prepare maker and taker orders for putting into trade
-        trade_taker_order = this.shallowCopy(taker_order);
-        trade_maker_order = this.shallowCopy(maker_order);
-        trade_taker_order.price = this.shallowCopy(trade_maker_order.price);
+        trade_taker_order = TradingPairExchange.shallowCopy(taker_order);
+        trade_maker_order = TradingPairExchange.shallowCopy(maker_order);
+        trade_taker_order.price = TradingPairExchange.shallowCopy(trade_maker_order.price);
 
         if (maker_order.amount > taker_order.amount) {
           await this.depleteOrder(maker_order, taker_order.amount, 0);
-          trade_maker_order.amount = this.shallowCopy(taker_order.amount);
+          trade_maker_order.amount = TradingPairExchange.shallowCopy(taker_order.amount);
           taker_order.amount = 0;
 
         } else {
-          orders_to_cancel.push(this.shallowCopy(maker_order));
-          trade_taker_order.amount = this.shallowCopy(trade_maker_order.amount);
-          taker_order.amount -= this.shallowCopy(maker_order.amount);
+          orders_to_cancel.push(TradingPairExchange.shallowCopy(maker_order));
+          trade_taker_order.amount = TradingPairExchange.shallowCopy(trade_maker_order.amount);
+          taker_order.amount -= TradingPairExchange.shallowCopy(maker_order.amount);
         }
 
         // Make Trade
@@ -458,7 +494,7 @@ class TradingPairExchange {
       }
 
       // Get next order, creating a copy
-      maker_order = this.shallowCopy(iter.next());
+      maker_order = TradingPairExchange.shallowCopy(iter.next());
     }
 
     // Cancel all outstanding orders
@@ -492,7 +528,7 @@ class TradingPairExchange {
    * @param {Object} obj - Object to copy
    * @return {Object} copied object
    */
-  shallowCopy(obj) {
+  static shallowCopy(obj) {
     return JSON.parse(JSON.stringify(obj));
   }
  
@@ -572,7 +608,7 @@ class TradingPairExchange {
    */
   bookIterator(start_price, end_price, increment) {
     let current_price = start_price;
-    let db = this.dbs
+    let db = this.db
     let current_queue = db.get(current_price);
     let current_index = 0;
 
