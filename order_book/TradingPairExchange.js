@@ -135,7 +135,7 @@ class TradingPairExchange {
    * @param {Trade} trade - Trade to shift
    * @param {Integer} price_shift - No. of decimal places to shift price by.
    * @param {Integer} amount_shift - No. of decimal places to amount price by.
-   * @return {Trade} shifted trade
+   * @return {Trade} unshifted trade
    */
   static unshiftTrade(trade, price_shift, amount_shift) {
     // Make copy
@@ -148,6 +148,30 @@ class TradingPairExchange {
     trade_copy.maker_order = TradingPairExchange.unshiftOrder(
       trade_copy.maker_order, price_shift, amount_shift);
     trade_copy.taker_order = TradingPairExchange.unshiftOrder(
+      trade_copy.taker_order, price_shift, amount_shift);
+    return trade_copy;
+  }
+
+  /**
+   * Private internal helper function.
+   * Call shiftOrder on maker and taker orders inside a Trade object.
+   *
+   * @param {Trade} trade - Trade to shift
+   * @param {Integer} price_shift - No. of decimal places to shift price by.
+   * @param {Integer} amount_shift - No. of decimal places to amount price by.
+   * @return {Trade} shifted trade
+   */
+  static shiftTrade(trade, price_shift, amount_shift) {
+    // Make copy
+    let trade_copy = new Trade(
+      TradingPairExchange.shallowCopy(trade.maker_order),
+      TradingPairExchange.shallowCopy(trade.taker_order));
+    trade_copy.timestamp = TradingPairExchange.shallowCopy(trade.timestamp);
+
+    // Unshift
+    trade_copy.maker_order = TradingPairExchange.shiftOrder(
+      trade_copy.maker_order, price_shift, amount_shift);
+    trade_copy.taker_order = TradingPairExchange.shiftOrder(
       trade_copy.taker_order, price_shift, amount_shift);
     return trade_copy;
   }
