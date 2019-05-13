@@ -200,7 +200,18 @@ class TradingPairExchange {
 
       // Store taker order
       await this.storeOrderInPerUserDB(this.matched_orders_db, trade.taker_order.user, trade.taker_order);
-      return trade;
+      
+      // make copy then return
+      let trade_copy = new Trade(
+        TradingPairExchange.shallowCopy(trade.maker_order),
+        TradingPairExchange.shallowCopy(trade.taker_order));
+      trade_copy.timestamp = TradingPairExchange.shallowCopy(trade.timestamp);
+      // Unshift
+      trade_copy.maker_order = TradingPairExchange.unshiftOrder(
+        trade_copy.maker_order, this.price_shift, this.amount_shift);
+      trade_copy.taker_order = TradingPairExchange.unshiftOrder(
+        trade_copy.taker_order, this.price_shift, this.amount_shift);
+      return trade_copy;
   }
   return undefined;
   }
