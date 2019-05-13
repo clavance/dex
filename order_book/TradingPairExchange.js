@@ -87,6 +87,8 @@ class TradingPairExchange {
     return num / Math.pow(10, shift_amount);
   }
 
+
+
   /**
    * Private internal helper function.
    * Stores given order for given user, in given (user: X) key-value store
@@ -248,26 +250,18 @@ class TradingPairExchange {
   }
 
   /**
-   * Cancel order in order book database
-   * @param {Order} order - Contains details of order to cancel.
-   * @param {int} custom_shift_amount - Set if want to use non-standard shift
-     amount, e.g. 0 if no shifting necessary.
-   */
-
-  /**
    * Cancel order in order book database. Remove Order object from OrbitDB. Also
    * updates metadata and pending orders.
    *
    * @param {Order} order - order to cancel
-   * @param {Integer} custom_shift_amount - Set if want to use non-standard shift
    */
-  async cancelOrder(order, custom_shift_amount) {
+  async cancelOrder(order) {
 
     // Shift order values so represented as int internally
     order.price = TradingPairExchange.shiftToInt(
-      order.price, custom_shift_amount || this.price_shift);
+      order.price,this.price_shift);
     order.amount = TradingPairExchange.shiftToInt(
-      order.amount, custom_shift_amount || this.amount_shift);
+      order.amount, this.amount_shift);
 
     await this.removeOrder(order);
 
@@ -578,7 +572,7 @@ class TradingPairExchange {
    */
   bookIterator(start_price, end_price, increment) {
     let current_price = start_price;
-    let db = this.db
+    let db = this.dbs
     let current_queue = db.get(current_price);
     let current_index = 0;
 
