@@ -238,7 +238,12 @@ class TradingPairExchange {
   * @return {Order[]} list of Order objects, for given user
   */
   getTradeHistoryPerUser(user) {
-    return this.matched_orders_db.get(user);
+  	let orders = this.matched_orders_db.get(user);
+  	let orders_copy = []
+  	for (let i = 0; i < orders.length; i++) {
+  		orders_copy.push(TradingPairExchange.unshiftOrder(orders[i], this.price_shift, this.amount_shift));
+  	}
+  	return orders_copy;
   }
 
   /**
@@ -248,7 +253,12 @@ class TradingPairExchange {
   * @return {Order[]} list of Order objects, for given user
   */
   getPendingOrdersPerUser(user) {
-    return this.pending_orders_db.get(user);
+  	let orders = this.pending_orders_db.get(user);
+  	let orders_copy = []
+  	for (let i = 0; i < orders.length; i++) {
+  		orders_copy.push(TradingPairExchange.unshiftOrder(orders[i], this.price_shift, this.amount_shift));
+  	}
+  	return orders_copy;
   }
 
 
