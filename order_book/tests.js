@@ -1073,7 +1073,7 @@ ipfs.on('ready', async () => {
   // Test that can retrieve single past trade
   num_tests_run++;
   try {
-    await exchange.popNextTrade();
+    await exchange.addTradeToTradeHistory(await exchange.popNextTrade());
     let hist = exchange.getTradeHistoryPerUser("#70");
     assert.strictEqual(hist.length, 1);
     hist[0].timestamp = undefined;
@@ -1100,8 +1100,8 @@ ipfs.on('ready', async () => {
   // Test that can retrieve multiple past trades, in chronological order
   num_tests_run++;
   try {
-    await exchange.popNextTrade();
-    await exchange.popNextTrade();
+    await exchange.addTradeToTradeHistory(await exchange.popNextTrade());
+    await exchange.addTradeToTradeHistory(await exchange.popNextTrade());
     let hist = exchange.getTradeHistoryPerUser("#72");
     assert.strictEqual(hist.length, 2);
     hist[0].timestamp = undefined;

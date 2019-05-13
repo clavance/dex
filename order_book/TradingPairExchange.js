@@ -244,14 +244,29 @@ class TradingPairExchange {
       trade.taker_order.timestamp = trade.timestamp;
 
       // Store maker order
-      await this.storeOrderInPerUserDB(this.matched_orders_db, trade.maker_order.user, trade.maker_order);
+      // await this.storeOrderInPerUserDB(this.matched_orders_db, trade.maker_order.user, trade.maker_order);
 
       // Store taker order
-      await this.storeOrderInPerUserDB(this.matched_orders_db, trade.taker_order.user, trade.taker_order);
+      // await this.storeOrderInPerUserDB(this.matched_orders_db, trade.taker_order.user, trade.taker_order);
 
       return TradingPairExchange.unshiftTrade(trade, this.price_shift, this.amount_shift);
   }
   return undefined;
+  }
+
+  /**
+   * Extract and store maker and taker Order objects from Trade object in
+   * matched_orders_db.
+   *
+   * @param {Trade} trade - Trade object to store
+   */
+  async addTradeToTradeHistory(trade) {
+  	let trade_shifted = TradingPairExchange.shiftTrade(trade, this.price_shift, this.amount_shift);
+  	// Store maker order
+  	await this.storeOrderInPerUserDB(this.matched_orders_db, trade_shifted.maker_order.user, trade_shifted.maker_order);
+
+  	// Store taker order
+  	await this.storeOrderInPerUserDB(this.matched_orders_db, trade_shifted.taker_order.user, trade_shifted.taker_order);
   }
 
   /**
