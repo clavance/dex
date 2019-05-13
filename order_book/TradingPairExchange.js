@@ -29,9 +29,9 @@ class TradingPairExchange {
    */
   constructor(name, ipfs, tick_size, price_shift, amount_shift) {
     // Populate default parameters
-    this.tick_size = TradingPairExchange.shiftToInt(tick_size, price_shift) || 1;
     this.price_shift = price_shift || 0;
     this.amount_shift = amount_shift || 0;
+    this.tick_size = TradingPairExchange.shiftToInt(tick_size, price_shift) || 1;
 
     this.name = name;
     this.ipfs = ipfs;
@@ -309,13 +309,12 @@ class TradingPairExchange {
    * @param {Order} order - order to add/match
    * @return {Number} timestamp of order, in milliseconds since 1 Jan 1970 00:00:00
    */
-  async addOrder(order) {
+  async addOrder(order_in) {
 
-    let order_ts = new Date().getTime();
-    order.timestamp = new Date().getTime();
+    order_in.timestamp = new Date().getTime();
 
     // Shift order values so represented as int internally
-    order = TradingPairExchange.shiftOrder(order, this.price_shift, this.amount_shift);
+    let order = TradingPairExchange.shiftOrder(order_in, this.price_shift, this.amount_shift);
 
     // Perform order matching
     await this.matchOrder(order);
@@ -546,7 +545,7 @@ class TradingPairExchange {
         trade_taker_order.price = TradingPairExchange.shallowCopy(trade_maker_order.price);
 
         if (maker_order.amount > taker_order.amount) {
-          await this.depleteOrder(maker_order, taker_order.amount, 0);
+          await this.depleteOrder(maker_order, taker_order.amount);
           trade_maker_order.amount = TradingPairExchange.shallowCopy(taker_order.amount);
           taker_order.amount = 0;
 
@@ -573,7 +572,9 @@ class TradingPairExchange {
 
     // Cancel all outstanding orders
     for (let i = 0; i < orders_to_cancel.length; i++) {
-      await this.cancelOrder(orders_to_cancel[i], 0);
+      await this.cancelOrder(
+      	TradingPairExchange.unshiftOrder(
+      		orders_to_cancel[i], this.price_shift, this.amount_shift));
     }
   }
 

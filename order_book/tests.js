@@ -472,7 +472,7 @@ ipfs.on('ready', async () => {
   num_tests_run = 0;
   num_tests_passed = 0;
 
-  exchange = new TradingPairExchange('test-db', ipfs, 1);
+  exchange = new TradingPairExchange('test-db', ipfs, 1, 1, 1);
   await exchange.init();
 
   let ts_1 = await exchange.addOrder(new Order(false, 10, 100, "#1", undefined));
@@ -485,9 +485,8 @@ ipfs.on('ready', async () => {
   try {
     order = new Order(true, 20, 90, "#5", undefined);
     let ts_5 = await exchange.addOrder(order);
-    console.log
     assert.strictEqual(exchange.trade_queue.length, [].length);
-    assert.strictEqual(JSON.stringify(exchange.db.get(90)[0]), JSON.stringify(new Order(true, 20, 90, "#5", ts_5)));
+    assert.strictEqual(JSON.stringify(exchange.db.get(900)[0]), JSON.stringify(new Order(true, 200, 900, "#5", ts_5)));
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
@@ -700,7 +699,7 @@ ipfs.on('ready', async () => {
 
   exchange.db.close();
 
-  exchange = new TradingPairExchange('test-db', ipfs, 1);
+  exchange = new TradingPairExchange('test-db', ipfs, 1, 1, 1);
   await exchange.init();
 
   let ts_29 = await exchange.addOrder(new Order(false, 10, 100, "#29", undefined));
@@ -714,16 +713,16 @@ ipfs.on('ready', async () => {
     order = new Order(true, 50, 120, "#32", undefined);
     let ts_32 = await exchange.addOrder(order);
     let trade_queue = exchange.trade_queue;
-    assert.strictEqual(JSON.stringify(trade_queue[0].maker_order), JSON.stringify(new Order(false, 10, 100, "#29", ts_29)));
-    assert.strictEqual(JSON.stringify(trade_queue[0].taker_order), JSON.stringify(new Order(true, 10, 100, "#32", ts_32)));
-    assert.strictEqual(JSON.stringify(trade_queue[1].maker_order), JSON.stringify(new Order(false, 10, 110, "#30", ts_30)));
-    assert.strictEqual(JSON.stringify(trade_queue[1].taker_order), JSON.stringify(new Order(true, 10, 110, "#32", ts_32)));
-    assert.strictEqual(JSON.stringify(trade_queue[2].maker_order), JSON.stringify(new Order(false, 20, 120, "#31", ts_31)));
-    assert.strictEqual(JSON.stringify(trade_queue[2].taker_order), JSON.stringify(new Order(true, 20, 120, "#32", ts_32)));
+    assert.strictEqual(JSON.stringify(trade_queue[0].maker_order), JSON.stringify(new Order(false, 100, 1000, "#29", ts_29)));
+    assert.strictEqual(JSON.stringify(trade_queue[0].taker_order), JSON.stringify(new Order(true, 100, 1000, "#32", ts_32)));
+    assert.strictEqual(JSON.stringify(trade_queue[1].maker_order), JSON.stringify(new Order(false, 100, 1100, "#30", ts_30)));
+    assert.strictEqual(JSON.stringify(trade_queue[1].taker_order), JSON.stringify(new Order(true, 100, 1100, "#32", ts_32)));
+    assert.strictEqual(JSON.stringify(trade_queue[2].maker_order), JSON.stringify(new Order(false, 200, 1200, "#31", ts_31)));
+    assert.strictEqual(JSON.stringify(trade_queue[2].taker_order), JSON.stringify(new Order(true, 200, 1200, "#32", ts_32)));
 
-    assert.strictEqual(exchange.db.get(100).length, 0);
-    assert.strictEqual(exchange.db.get(110).length, 0);
-    assert.strictEqual(JSON.stringify(exchange.db.get(120)[0]), JSON.stringify(new Order(true, 10, 120, "#32", ts_32)));
+    assert.strictEqual(exchange.db.get(1000).length, 0);
+    assert.strictEqual(exchange.db.get(1100).length, 0);
+    assert.strictEqual(JSON.stringify(exchange.db.get(1200)[0]), JSON.stringify(new Order(true, 100, 1200, "#32", ts_32)));
     num_tests_passed++;
   } catch (err) {
     num_tests_failed++;
