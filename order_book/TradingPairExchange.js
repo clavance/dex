@@ -98,7 +98,7 @@ class TradingPairExchange {
    * @return {Number} shifted input number
    */
   static shiftOrder(order, price_shift, amount_shift) {
-    let internal_order = order;//TradingPairExchange.shallowCopy(order);
+    let internal_order = TradingPairExchange.shallowCopy(order);
     // Shift order values so represented as int internally
     internal_order.price = TradingPairExchange.shiftToInt(
       internal_order.price, price_shift);
@@ -119,7 +119,7 @@ class TradingPairExchange {
    * @return {Number} shifted input number
    */
   static unshiftOrder(order, price_shift, amount_shift) {
-    let internal_order = order;//TradingPairExchange.shallowCopy(order);
+    let internal_order = TradingPairExchange.shallowCopy(order);
     // Shift order values so represented as int internally
     internal_order.price = TradingPairExchange.shiftToFloat(
       internal_order.price, price_shift);
