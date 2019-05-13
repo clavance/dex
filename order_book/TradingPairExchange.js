@@ -95,7 +95,7 @@ class TradingPairExchange {
    * @param {Order} order - Order to shift
    * @param {Integer} price_shift - No. of decimal places to shift price by.
    * @param {Integer} amount_shift - No. of decimal places to amount price by.
-   * @return {Number} shifted input number
+   * @return {Order} shifted order
    */
   static shiftOrder(order, price_shift, amount_shift) {
     let internal_order = TradingPairExchange.shallowCopy(order);
@@ -116,7 +116,7 @@ class TradingPairExchange {
    * @param {Order} order - Order to shift
    * @param {Integer} price_shift - No. of decimal places to shift price by.
    * @param {Integer} amount_shift - No. of decimal places to amount price by.
-   * @return {Number} shifted input number
+   * @return {Order} shifted order
    */
   static unshiftOrder(order, price_shift, amount_shift) {
     let internal_order = TradingPairExchange.shallowCopy(order);
@@ -126,6 +126,30 @@ class TradingPairExchange {
     internal_order.amount = TradingPairExchange.shiftToFloat(
       internal_order.amount, amount_shift);
     return internal_order;
+  }
+
+  /**
+   * Private internal helper function.
+   * Call unshiftOrder on maker and taker orders inside a Trade object.
+   *
+   * @param {Trade} trade - Trade to shift
+   * @param {Integer} price_shift - No. of decimal places to shift price by.
+   * @param {Integer} amount_shift - No. of decimal places to amount price by.
+   * @return {Trade} shifted trade
+   */
+  static unshiftTrade(trade, price_shift, amount_shift) {
+    // Make copy
+    let trade_copy = new Trade(
+      TradingPairExchange.shallowCopy(trade.maker_order),
+      TradingPairExchange.shallowCopy(trade.taker_order));
+    trade_copy.timestamp = TradingPairExchange.shallowCopy(trade.timestamp);
+
+    // Unshift
+    trade_copy.maker_order = TradingPairExchange.unshiftOrder(
+      trade_copy.maker_order, price_shift, amount_shift);
+    trade_copy.taker_order = TradingPairExchange.unshiftOrder(
+      trade_copy.taker_order, price_shift, amount_shift);
+    return trade_copy;
   }
 
 
@@ -200,18 +224,8 @@ class TradingPairExchange {
 
       // Store taker order
       await this.storeOrderInPerUserDB(this.matched_orders_db, trade.taker_order.user, trade.taker_order);
-      
-      // make copy then return
-      let trade_copy = new Trade(
-        TradingPairExchange.shallowCopy(trade.maker_order),
-        TradingPairExchange.shallowCopy(trade.taker_order));
-      trade_copy.timestamp = TradingPairExchange.shallowCopy(trade.timestamp);
-      // Unshift
-      trade_copy.maker_order = TradingPairExchange.unshiftOrder(
-        trade_copy.maker_order, this.price_shift, this.amount_shift);
-      trade_copy.taker_order = TradingPairExchange.unshiftOrder(
-        trade_copy.taker_order, this.price_shift, this.amount_shift);
-      return trade_copy;
+
+      return TradingPairExchange.unshiftTrade(trade, this.price_shift, this.amount_shift);
   }
   return undefined;
   }
