@@ -1296,29 +1296,29 @@ ipfs.on('ready', async () => {
   }
   exchange.db.close();
 
-  exchange = new TradingPairExchange('test-db', ipfs, 1, 2, 1);
-  await exchange.init();
-  let ts_83 = await exchange.addOrder(new Order(true, 10.3, 100.03, "#83", undefined));
-  let ts_84 = await exchange.addOrder(new Order(false, 15.2, 110.15, "#84", undefined));
+  // exchange = new TradingPairExchange('test-db', ipfs, 1, 2, 1);
+  // await exchange.init();
+  // let ts_83 = await exchange.addOrder(new Order(true, 10.3, 100.03, "#83", undefined));
+  // let ts_84 = await exchange.addOrder(new Order(false, 15.2, 110.15, "#84", undefined));
 
-  // Test that can retrieve multiple orders, with price and amount shifting
-  num_tests_run++;
-  try {
-    let orders = exchange.getAllOrders();
-    assert.strictEqual(orders.length, 2);
-    assert.strictEqual(
-      JSON.stringify(new Order(true, 10.3, 100.03, "#83", ts_83)),
-      JSON.stringify(orders[0]));
-    assert.strictEqual(
-      JSON.stringify(new Order(false, 15.2, 110.15, "#84", ts_84)),
-      JSON.stringify(orders[1]));
-    num_tests_passed++;
-  } catch (err) {
-    num_tests_failed++;
-    console.log("FAILED: getAllOrders: Test 4");
-    console.log(err.name, ": ", err.actual, err.operator, err.expected);
-  }
-  exchange.db.close();
+  // // Test that can retrieve multiple orders, with price and amount shifting
+  // num_tests_run++;
+  // try {
+  //   let orders = exchange.getAllOrders();
+  //   assert.strictEqual(orders.length, 2);
+  //   assert.strictEqual(
+  //     JSON.stringify(new Order(true, 10.3, 100.03, "#83", ts_83)),
+  //     JSON.stringify(orders[0]));
+  //   assert.strictEqual(
+  //     JSON.stringify(new Order(false, 15.2, 110.15, "#84", ts_84)),
+  //     JSON.stringify(orders[1]));
+  //   num_tests_passed++;
+  // } catch (err) {
+  //   num_tests_failed++;
+  //   console.log("FAILED: getAllOrders: Test 4");
+  //   console.log(err.name, ": ", err.actual, err.operator, err.expected);
+  // }
+  // exchange.db.close();
 
   if (num_tests_passed === num_tests_run) {
     console.log("ALL " + num_tests_run + " getAllOrders TESTS PASSED!");
