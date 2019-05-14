@@ -720,6 +720,40 @@ class TradingPairExchange {
     return iterator;
   }
 
+  /**
+   * Retrieve list of all orders, first ordered from price low to high, then if
+   * price is same order by earliest placement time.
+   *
+   * @return {Order[]} list of orders
+   */
+  getAllOrders() {
+    let orders = [];
+    let metadata = this.db.get("metadata");
+    // Special case for no orders present
+    if (metadata.worst_bid === undefined && metadata.worst_ask === undefined) {
+      return [];
+    }
+
+    // Special cases when only bids or only asks
+    let low = metadata.worst_bid;
+    let high = metadata.worst_ask;
+    if (metadata.worst_bid !== undefined && metadata.worst_ask === undefined) {
+      high = metadata.best_bid;
+    }
+    if (metadata.worst_bid === undefined && metadata.worst_ask !== undefined) {
+      low = metadata.best_ask;
+    }
+
+    // Perform iteration
+  	let iter = this.bookIterator(low, high, this.tick_size);
+  	let order = iter.next();
+  	while (!order.done) {
+      orders.push(TradingPairExchange.unshiftOrder(order, this.price_shift, this.amount_shift));
+  	  order = iter.next();
+  	}
+    return orders;
+  }
+
 }
 
 module.exports = {
